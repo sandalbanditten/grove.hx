@@ -78,6 +78,13 @@ Model stores this observation. Layout combines it with requested width and side
 to derive Pane bounds, Pane availability, ordinary capacity, and Rail geometry.
 _Avoid_: Pane geometry, viewport geometry
 
+**Natural width**:
+The Pane width that shows every Visible row whole: its Cursor mark, Ancestor
+traces, expansion control, icon area, label, and Unsaved mark, plus the Rail
+beside them. Fitting requests it for the widest Visible row and stays within
+the Grove width limits and the space the Host leaves.
+_Avoid_: Preferred width, auto width, content width
+
 **Rail**:
 The permanent editor-facing column of Grove. Its track separates Grove from the
 editor, its optional thumb represents the viewport, and horizontal dragging

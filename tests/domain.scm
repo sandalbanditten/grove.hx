@@ -336,3 +336,84 @@
   (and
     (every-reveal-is-visible? 'first)
     (every-reveal-is-visible? 'nearest)))
+
+; ADR 0013: File tree merging needs more entries than a Pane can present, so
+; its order laws cannot be proven through rendered rows.
+(define ORDER-SIZE 400)
+
+(define (padded value)
+  (define text (number->string value))
+  (cond
+    [(= (string-length text) 1) (string-append "000" text)]
+    [(= (string-length text) 2) (string-append "00" text)]
+    [(= (string-length text) 3) (string-append "0" text)]
+    [else text]))
+
+(define (item-id index)
+  (string-append "item-" (padded index)))
+
+(define (ordered-ids limit)
+  (let loop ([index (- limit 1)] [result '()])
+    (if
+      (< index 0)
+      result
+      (loop (- index 1) (cons (item-id index) result)))))
+
+(define (scrambled-ids limit)
+  (let loop ([index 0] [result '()])
+    (if
+      (= index limit)
+      result
+      (loop
+        (+ index 1)
+        (cons (item-id (modulo (* index 7919) limit)) result)))))
+
+(define (ids-of file-tree)
+  (map tree.entry-id file-tree))
+
+(define ascending-scan
+  (tree.build (map file (ordered-ids ORDER-SIZE))))
+
+(check
+  "an ordered scan keeps its own order"
+  (equal?
+    (ids-of ascending-scan)
+    (cons root-id (ordered-ids ORDER-SIZE))))
+
+(check
+  "File tree order does not depend on scan order"
+  (and
+    (equal?
+      (ids-of ascending-scan)
+      (ids-of (tree.build (map file (scrambled-ids ORDER-SIZE)))))
+    (equal?
+      (ids-of ascending-scan)
+      (ids-of (tree.build (map file (reverse (ordered-ids ORDER-SIZE))))))))
+
+(define (directory-run? file-tree)
+  (let loop ([remaining (cdr file-tree)] [seen-file? #f])
+    (or
+      (null? remaining)
+      (let ([directory? (equal? (tree.entry-kind (car remaining)) 'directory)])
+        (and
+          (not (and directory? seen-file?))
+          (loop (cdr remaining) (or seen-file? (not directory?))))))))
+
+(define (mixed-scan limit)
+  (let loop ([index 0] [result '()])
+    (if
+      (= index limit)
+      (tree.build result)
+      (let ([value (modulo (* index 7919) limit)])
+        (loop
+          (+ index 1)
+          (cons
+            (if
+              (= 0 (modulo value 2))
+              (directory (item-id value))
+              (file (item-id value)))
+            result))))))
+
+(check
+  "a scrambled scan still ranks directories before files"
+  (directory-run? (mixed-scan ORDER-SIZE)))

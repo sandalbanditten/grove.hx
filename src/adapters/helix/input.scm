@@ -61,6 +61,7 @@
       (model.cursor-open-requested current-model 'vertical-split)]
     [(plain? #\+) (model.resize-by-requested current-model 1)]
     [(plain? #\-) (model.resize-by-requested current-model -1)]
+    [(plain? #\=) (model.fit-width-requested current-model)]
     [(plain? #\n) (model.cursor-mutation-requested current-model 'file)]
     [(plain? #\N) (model.cursor-mutation-requested current-model 'directory)]
     [(plain? #\r) (model.cursor-mutation-requested current-model 'rename)]

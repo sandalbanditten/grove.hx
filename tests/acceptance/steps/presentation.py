@@ -167,6 +167,17 @@ def long_filename_clips(grove: GroveDriver, name: str, mark: str) -> None:
     )
 
 
+@then("no File tree row is clipped")
+def no_row_is_clipped(grove: GroveDriver) -> None:
+    def mismatch(frame: GroveFrame) -> str | None:
+        if frame.pane is None:
+            return "Grove has no Pane"
+        clipped = [row.text for row in frame.pane.rows if "…" in row.text]
+        return f"Grove clipped rows {clipped!r}" if clipped else None
+
+    grove.wait(mismatch)
+
+
 @then(parsers.parse('ignored status dims the "{name}" label only'))
 def ignored_status_dims_label(grove: GroveDriver, name: str) -> None:
     def mismatch(frame: GroveFrame) -> str | None:

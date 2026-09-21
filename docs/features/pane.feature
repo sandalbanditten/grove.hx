@@ -80,6 +80,66 @@ Feature: Size and place the Pane
       | 64      | 100      | +   | 64       | 100   |
       | 24      | 25       | +   | 24       | 26    |
 
+  Scenario Outline: Fit the width to the widest Visible row
+    Given a Workspace containing entries
+      | path    |
+      | <entry> |
+    And "<entry>" is Active
+    And Grove settings
+      | setting | value |
+      | side    | left  |
+      | width   | 32    |
+    When Helix starts with Grove in that Workspace
+    And the terminal width becomes <terminal> columns
+    And Grove is focused
+    And Grove receives "="
+    Then Grove has width <expected>
+
+    Examples:
+      | entry                             | terminal | expected |
+      | a-considerably-long-file-name.txt | 100      | 40       |
+      | readme-notes.txt                  | 100      | 23       |
+      | a-considerably-long-file-name.txt | 36       | 35       |
+      | a.txt                             | 100      | 16       |
+
+  Scenario: Fit the width around Ancestor traces without clipping
+    Given a Workspace containing entries
+      | kind      | path                  |
+      | file      | anchor.txt            |
+      | directory | outer                 |
+      | file      | outer/nested-name.txt |
+    And "anchor.txt" is Active
+    And Grove settings
+      | setting | value |
+      | side    | left  |
+      | width   | 20    |
+    When Helix starts with Grove in that Workspace
+    And the "outer" directory is expanded
+    And Grove is focused
+    And Grove receives "="
+    Then Grove has width 24
+    And no File tree row is clipped
+    When the "outer" directory is collapsed
+    And Grove receives "="
+    Then Grove has width 17
+    And no File tree row is clipped
+
+  Scenario: Fit the width with icons disabled
+    Given a Workspace containing entries
+      | path             |
+      | readme-notes.txt |
+    And "readme-notes.txt" is Active
+    And Grove settings
+      | setting | value    |
+      | side    | left     |
+      | width   | 32       |
+      | icons   | disabled |
+    When Helix starts with Grove in that Workspace
+    And Grove is focused
+    And Grove receives "="
+    Then Grove has width 21
+    And no File tree row is clipped
+
   Scenario Outline: Resize from the Rail on either side
     Given a Workspace containing entries
       | path       |

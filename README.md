@@ -116,6 +116,7 @@ binding. Mouse input works without focusing Grove.
 | `r` | Rename or move a file, link, or directory |
 | `d` | Permanently delete a file or link, or recursively delete a directory |
 | `+` / `-` | Resize Grove |
+| `=` | Fit Grove to its widest visible entry |
 | `Escape` | Return focus to the editor |
 | Click a file or directory | Open the file or toggle the directory |
 | Mouse wheel | Scroll the tree |

@@ -31,6 +31,7 @@
   scroll-anchor-requested
   resize-by-requested
   resize-to-requested
+  fit-width-requested
   update-result-model
   update-result-command
   model-command-kind
@@ -585,3 +586,24 @@
 
 (define (resize-by-requested model amount)
   (resize-to-requested model (+ (model-value-width model) amount)))
+
+; The Pane fits its widest Visible row plus the Rail column beside it.
+(define (natural-width model)
+  (define current-facts (row-facts model))
+  (define icons (model-value-icons? model))
+  (let loop ([remaining (visible-entries model)] [widest 0])
+    (if
+      (null? remaining)
+      (and (> widest 0) (+ widest 1))
+      (loop
+        (cdr remaining)
+        (max
+          widest
+          (row.natural-width current-facts (car remaining) icons))))))
+
+(define (fit-width-requested model)
+  (define target (natural-width model))
+  (if
+    target
+    (resize-to-requested model target)
+    (update-result model #f)))

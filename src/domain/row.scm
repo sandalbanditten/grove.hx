@@ -5,6 +5,7 @@
 
 (provide facts
   label
+  natural-width
   git-status
   unsaved-status
   active-file?
@@ -18,6 +19,29 @@
   (define id (tree.entry-id entry))
   (path.basename
     (if (path.root-id? id) (facts-root current-facts) id)))
+
+(define (icon-area-width root? icons?)
+  (cond
+    [(not icons?) (if root? 0 1)]
+    [root? 2]
+    [else 3]))
+
+; ADR 0012 keeps arithmetic within the arity Steel's JIT compiles.
+(define (fixed-width id root? icons?)
+  (+
+    ; Cursor mark, expansion control, and Unsaved mark
+    (if root? 2 3)
+    ; Ancestor traces
+    (* 2 (max 0 (- (path.depth id) 1)))
+    (icon-area-width root? icons?)))
+
+; Grove builds every row from the same fixed parts, so the columns one row
+; needs in full are their total. Keep this in step with the Pane renderer.
+(define (natural-width current-facts entry icons?)
+  (define id (tree.entry-id entry))
+  (+
+    (fixed-width id (path.root-id? id) icons?)
+    (string-length (label current-facts entry))))
 
 (define (git-status current-facts entry)
   (define kind (tree.entry-kind entry))
