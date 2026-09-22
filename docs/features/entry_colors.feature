@@ -80,6 +80,27 @@ Feature: Color entry labels from an Entry palette
       | row                | color    |
       | touched/inside.txt | 40 50 60 |
 
+  Scenario: Paint an Entry icon with its label's color
+    Given a Workspace containing entries
+      | kind      | path    |
+      | file      | main.rs |
+      | directory | folder  |
+    And "main.rs" is Active
+    And Grove reads these Entry colors
+      | key  | code            |
+      | di   | 0;38;2;10;20;30 |
+      | fi   | 0;38;2;40;50;60 |
+      | *.rs | 1;38;2;70;80;90 |
+    When Helix starts with Grove in that Workspace
+    Then these rows use Entry colors
+      | row     | color    |
+      | folder  | 10 20 30 |
+      | main.rs | 70 80 90 |
+    And the "main.rs" icon uses the Entry color 70 80 90
+    And the "folder" icon uses the Entry color 10 20 30
+    And "main.rs" label is bold
+    And the "main.rs" icon is not bold
+
   Scenario: Read the palette from the environment
     Given a Workspace containing entries
       | path       |

@@ -62,15 +62,6 @@ Feature: Theme Grove
     When Helix starts with Grove in that Workspace
     Then "active.txt" uses background "#040506" and the foreground of "plain.txt" without modifiers
 
-  Scenario Outline: Choose the icon palette from theme inputs
-    Given a Workspace containing entries
-      | path       |
-      | plain.txt  |
-    And "plain.txt" is Active
-    And the Host theme uses background "<background>" and text "<text>"
-    When Helix starts with Grove in that Workspace
-    Then "plain.txt" uses the "<variant>" file icon variant
-
     Examples:
       | background | text    | variant |
       | default    | default | dark    |

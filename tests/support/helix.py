@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import json
-import os
 import re
-import shutil
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -220,10 +218,7 @@ class HelixSandbox:
         helix_config = config_home / "helix"
         steel_home = self.root / "steel"
         (helix_config / "themes").mkdir(parents=True)
-        shutil.copytree(
-            _installed_steel_home() / "cogs" / "devicons",
-            steel_home / "cogs" / "devicons",
-        )
+        steel_home.mkdir(parents=True, exist_ok=True)
         (helix_config / "themes" / "grove_test.toml").write_text(
             theme, encoding="utf-8"
         )
@@ -326,12 +321,3 @@ def _document_close_hook(destination: Path) -> str:
         "    (newline port))\n"
         "   #:exists 'append)))"
     )
-
-
-def _installed_steel_home() -> Path:
-    if configured := os.environ.get("STEEL_HOME"):
-        return Path(configured).expanduser()
-    data_home = os.environ.get("XDG_DATA_HOME")
-    return (
-        Path(data_home).expanduser() if data_home else Path.home() / ".local/share"
-    ) / "steel"

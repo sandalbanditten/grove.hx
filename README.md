@@ -73,7 +73,7 @@ file picker before Steel components mount.
 
 | Setting | Default | Values | Effect |
 | --- | --- | --- | --- |
-| `#:icons` | `#t` | `#t` or `#f` | Shows file icons. Requires a terminal font with Nerd Fonts 3.3 glyphs. |
+| `#:icons` | `#t` | `#t` or `#f` | Shows entry icons, using the glyphs `eza` ships. Requires a terminal font with Nerd Fonts 3.3 glyphs. |
 | `#:guides` | `#t` | `#t` or `#f` | Shows ancestor traces and Leaf marks. Cursor (`>`) and Active file (`*`) marks remain visible when disabled. |
 | `#:ls-colors` | `#f` | `#f`, `'environment`, or an `LS_COLORS` string | Colors entry labels from an `LS_COLORS` palette, the way `eza` does. `'environment` reads `LS_COLORS` then `EZA_COLORS` at startup. See [THEMING.md](THEMING.md). |
 | `#:side` | `'left` | `'left` or `'right` | Places Grove on that side of the editor. |

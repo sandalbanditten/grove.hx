@@ -17,6 +17,31 @@ Feature: Present File tree rows
     When the "folder" directory is expanded
     Then "folder/inside.txt" is indented two columns from "folder"
 
+  Scenario: Name entries with the icons eza ships
+    Given a Workspace containing entries
+      | kind      | path       |
+      | file      | module.scm |
+      | file      | main.rs    |
+      | file      | notes.md   |
+      | file      | plain      |
+      | directory | src        |
+      | directory | plain-dir  |
+    And "main.rs" is Active
+    When Helix starts with Grove in that Workspace
+    Then these rows use eza icons
+      | row        | codepoint |
+      | module.scm | U+E6B1    |
+      | main.rs    | U+E68B    |
+      | notes.md   | U+F48A    |
+      | plain      | U+F086F   |
+      | src        | U+F08DE   |
+      | plain-dir  | U+E5FF    |
+    When the "plain-dir" directory is expanded
+    Then these rows use eza icons
+      | row       | codepoint |
+      | src       | U+F08DE   |
+      | plain-dir | U+F115    |
+
   Scenario: Show Guides
     Given a Workspace containing entries
       | kind      | path                   |

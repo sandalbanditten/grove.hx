@@ -97,9 +97,9 @@ def file_tree_rows_appear_in_order(
 
 _ICONS = {
     "Broken link": "󰌺",
-    "File link": "",
+    "File link": "󰡯",
     "directory": "",
-    "file": "󰈙",
+    "file": "",
 }
 
 

@@ -99,13 +99,24 @@ A named visual part of Grove. Its documented colors can follow a Helix theme
 key or use fixed colors.
 _Avoid_: Style role, theme slot
 
+**Entry icon**:
+The glyph identifying a Visible row's entry, drawn before its label. Grove
+reads the catalog `eza` ships, so a row and an `eza` listing name the same file
+with the same glyph: a directory answers by name, a file by exact filename and
+then by lowercased extension. An Unreadable directory and a Broken link replace
+it with their failure glyph, and the Workspace root keeps its own. The icon
+takes the label's foreground without its modifiers, exactly as `eza` paints
+one.
+_Avoid_: Devicon, file glyph, icon palette
+
 **Entry palette**:
 The optional `LS_COLORS` ruleset that colors Visible row labels the way
 `vivid`, `eza`, and GNU `ls` do. A label takes the rule for its entry kind, or
 for the longest filename pattern matching it. The palette supplies a foreground
 and modifiers only: a filesystem error replaces that foreground while the
-modifiers remain. No rule reaches an icon, a mark, or any background.
-_Avoid_: LS_COLORS theme, icon palette, file colors
+modifiers remain. The Entry icon follows the same foreground; no rule reaches
+a mark or any background.
+_Avoid_: LS_COLORS theme, file colors
 
 **File tree**:
 One immutable ordered filesystem hierarchy containing the entries currently
@@ -142,7 +153,7 @@ presents through the Git mark and leaves entry labels alone. Directories take
 the strongest status beneath their path, including collapsed descendants, in
 this order: conflict, deleted, modified, created. Ignored status carries no mark
 and dims only the exact entry label. Git status never controls the File tree or
-recolors entry icons, labels, and Unsaved marks. Git status is scoped to the
+recolors Entry icons, labels, and Unsaved marks. Git status is scoped to the
 Workspace.
 _Avoid_: Git overlay, Git snapshot, Git truth, Git coloring
 

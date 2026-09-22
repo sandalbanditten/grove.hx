@@ -179,7 +179,6 @@ Feature: Present File tree status layers
       Then the Workspace icon, "modified.txt" file icon, and their Unsaved marks keep their foregrounds
       When Grove is focused
       Then the Cursor "modified.txt" row background spans its icon, label, and Unsaved mark
-      And "modified.txt" uses the "dark" file icon variant
       And "modified.txt" carries a modified Git mark
       When "ignored.txt" is activated
       And the editor inserts "ignored-" without saving and returns to Normal mode

@@ -5,7 +5,7 @@
 (require (prefix-in layout. "../../domain/layout.scm"))
 (require (prefix-in palette. "../../domain/palette.scm"))
 (require (prefix-in theme. "theme.scm"))
-(require (prefix-in devicons. "devicons/devicons.scm"))
+(require (prefix-in icons. "../../domain/icons.scm"))
 
 (provide draw!)
 
@@ -122,52 +122,40 @@
                   (run-style current))
                 result))])])))
 
-(define (icon-area-runs entry error-icon current-facts current-theme base-style)
-  (define palette (hash-ref current-theme 'icon-palette))
-  (define icon
-    (and
-      palette
-      (tree.file-kind? (tree.entry-kind entry))
-      (devicons.get_icon
+; `eza` paints an icon with the file name's own color and drops its modifiers,
+; so a glyph never carries bold or a dimmed Ignored label. Grove does the same
+; with the foreground it resolved for the label.
+(define (icon-glyph-for entry error-icon current-facts)
+  (define kind (tree.entry-kind entry))
+  (cond
+    [error-icon error-icon]
+    [(path.root-id? (tree.entry-id entry)) "󰙅"]
+    [(tree.directory-kind? kind)
+      (icons.glyph-for
         (row.label current-facts entry)
-        #:variant
-        palette)))
+        'directory
+        (row.expanded? current-facts entry))]
+    [else
+      (icons.glyph-for (row.label current-facts entry) 'file #f)]))
+
+(define (icon-area-runs
+         entry
+         error-icon
+         current-facts
+         current-theme
+         base-style
+         label-style)
+  (define root? (path.root-id? (tree.entry-id entry)))
   (define icon-run
     (and
-      palette
-      (cond
-        [icon
-          (run
-            (devicons.icon-glyph icon)
-            (style-fg
-              base-style
-              (Color/rgb
-                (devicons.icon-red icon)
-                (devicons.icon-green icon)
-                (devicons.icon-blue icon))))]
-        [error-icon
-          (run
-            error-icon
-            (style-fg
-              base-style
-              (hash-ref current-theme 'filesystem-error-foreground)))]
-        [(path.root-id? (tree.entry-id entry))
-          (run "󰙅" base-style)]
-        [(member (tree.entry-kind entry) '(directory directory-link))
-          (run
-            (if (row.expanded? current-facts entry) "" "")
-            base-style)]
-        [else #f])))
-  (if
-    icon-run
-    (if
-      (path.root-id? (tree.entry-id entry))
-      (list icon-run (run " " base-style))
-      (list (run " " base-style) icon-run (run " " base-style)))
-    (if
-      (path.root-id? (tree.entry-id entry))
-      '()
-      (list (run " " base-style)))))
+      (hash-ref current-theme 'icons?)
+      (run (icon-glyph-for entry error-icon current-facts) label-style)))
+  (cond
+    [(and icon-run root?) (list icon-run (run " " base-style))]
+    [icon-run
+      (list (run " " base-style) icon-run (run " " base-style))]
+    [root? '()]
+    [else (list (run " " base-style))]))
 
 ; Grove applies only the modifiers it can compose over a resolved row
 ; background. ADR 0010 keeps that background intact, so a reversing or hiding
@@ -229,7 +217,12 @@
       (append
         (row-leading-runs entry current-facts current-theme base-style)
         (icon-area-runs
-          entry error-icon current-facts current-theme base-style)
+          entry
+          error-icon
+          current-facts
+          current-theme
+          base-style
+          label-base)
         (list
           (run
             (replace-control-characters (row.label current-facts entry))

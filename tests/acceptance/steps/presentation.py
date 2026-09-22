@@ -109,6 +109,82 @@ def entry_carries_git_mark(grove: GroveDriver, name: str, status: str) -> None:
     grove.wait(mismatch)
 
 
+@then(parsers.re(r'^"(?P<name>.+)" uses icon (?P<codepoint>U\+[0-9A-F]{4,5})$'))
+def entry_uses_icon_codepoint(grove: GroveDriver, name: str, codepoint: str) -> None:
+    expected = chr(int(codepoint[2:], 16))
+
+    def mismatch(frame: GroveFrame) -> str | None:
+        row = _named_row(frame, name)
+        if row is None:
+            return f'Grove did not show "{name}"'
+        actual = row.icon
+        if actual == expected:
+            return None
+        seen = f"U+{ord(actual):04X}" if actual else "no icon"
+        return f'"{name}" used {seen} rather than {codepoint}'
+
+    grove.wait(mismatch)
+
+
+@then("these rows use eza icons")
+def rows_use_eza_icons(grove: GroveDriver, datatable: list[list[str]]) -> None:
+    header, *rows = datatable
+    expected = {
+        record["row"]: chr(int(record["codepoint"][2:], 16))
+        for record in (dict(zip(header, row)) for row in rows)
+    }
+
+    def mismatch(frame: GroveFrame) -> str | None:
+        for name, glyph in expected.items():
+            row = _named_row(frame, name)
+            if row is None:
+                return f'Grove did not show "{name}"'
+            if row.icon != glyph:
+                seen = f"U+{ord(row.icon):04X}" if row.icon else "no icon"
+                return f'"{name}" used {seen} rather than U+{ord(glyph):04X}'
+        return None
+
+    grove.wait(mismatch)
+
+
+@then(
+    parsers.re(
+        r'^the "(?P<name>.+)" icon uses the Entry color '
+        r"(?P<red>\d+) (?P<green>\d+) (?P<blue>\d+)$"
+    )
+)
+def icon_uses_entry_color(
+    grove: GroveDriver, name: str, red: str, green: str, blue: str
+) -> None:
+    expected = (int(red), int(green), int(blue))
+
+    def mismatch(frame: GroveFrame) -> str | None:
+        row = _named_row(frame, name)
+        if row is None:
+            return f'Grove did not show "{name}"'
+        if row.icon is None:
+            return f'"{name}" showed no icon'
+        actual = row.foreground_at(row.icon)
+        if actual != expected:
+            return f'"{name}" icon used {actual} rather than {expected}'
+        return None
+
+    grove.wait(mismatch)
+
+
+@then(parsers.re(r'^the "(?P<name>.+)" icon is not bold$'))
+def icon_is_not_bold(grove: GroveDriver, name: str) -> None:
+    def mismatch(frame: GroveFrame) -> str | None:
+        row = _named_row(frame, name)
+        if row is None:
+            return f'Grove did not show "{name}"'
+        if row.icon is None:
+            return f'"{name}" showed no icon'
+        return None if not row.is_bold_at(row.icon) else f'"{name}" icon was bold'
+
+    grove.wait(mismatch)
+
+
 @then(parsers.re(r'^"(?P<name>.+)" carries no Git mark$'))
 def entry_carries_no_git_mark(grove: GroveDriver, name: str) -> None:
     def mismatch(frame: GroveFrame) -> str | None:
@@ -141,19 +217,6 @@ def failed_entry_uses_error_presentation(
             and row.foreground_at(icon) == (255, 0, 255)
             and row.foreground_at(row.label) == (255, 0, 255)
             else f'"{name}" did not use the error foreground'
-        ),
-    )
-
-
-@then(parsers.parse('"{name}" uses the "{variant}" file icon variant'))
-def file_icon_uses_variant(grove: GroveDriver, name: str, variant: str) -> None:
-    color = {"dark": (137, 224, 81), "light": (68, 112, 40)}[variant]
-    grove.wait(
-        lambda frame: (
-            None
-            if (row := frame.row(scenario_path(name))) is not None
-            and row.foreground_at("󰈙") == color
-            else f"Grove did not use the {variant} file-icon variant"
         ),
     )
 
@@ -230,7 +293,7 @@ def ignored_status_dims_label(grove: GroveDriver, name: str) -> None:
             return "Grove did not show the Workspace root"
         if not ignored.is_dimmed_at(ignored.label):
             return f'Ignored label "{name}" was not dimmed'
-        icon = "" if "" in ignored.text else "󰈙"
+        icon = "" if "" in ignored.text else ""
         if ignored.is_dimmed_at(icon) or root.is_dimmed_at(root.label):
             return "Ignored dimming leaked beyond the item label"
         return None
@@ -256,8 +319,8 @@ def icons_and_unsaved_marks_keep_foregrounds(
             return f'Grove did not show status row "{name}"'
         if root.foreground_at("󰙅") != (216, 216, 216):
             return "Git status recolored the Workspace icon"
-        if row.foreground_at("󰈙") != (137, 224, 81):
-            return f'File icon for "{name}" lost its palette foreground'
+        if row.foreground_at("") != (216, 216, 216):
+            return f'File icon for "{name}" left its label foreground'
         if root.foreground_at("+") != (0, 255, 255):
             return "Git status recolored the Workspace Unsaved mark"
         if row.foreground_at("+") != (0, 255, 255):
@@ -277,7 +340,7 @@ def selected_background_spans_row(
     grove: GroveDriver,
     name: str,
 ) -> None:
-    markers = ("󰈙", PurePath(name).name, "+")
+    markers = ("", PurePath(name).name, "+")
     grove.wait(
         lambda frame: (
             None
@@ -302,17 +365,17 @@ def ignored_dimming_composes_with_selected_background(
         row = frame.row(scenario_path(name))
         if row is None:
             return f'Grove did not show ignored row "{name}"'
-        if "󰈙" not in row.text:
+        if "" not in row.text:
             return f'Ignored row "{name}" did not show its file icon'
         if "+" not in row.text:
             return f'Ignored row "{name}" did not show its Unsaved mark'
         if not row.is_dimmed_at(row.label):
             return "Ignored item label was not dimmed"
-        if row.is_dimmed_at("󰈙") or row.is_dimmed_at("+"):
+        if row.is_dimmed_at("") or row.is_dimmed_at("+"):
             return "Ignored dimming leaked to the icon or Unsaved mark"
         if not _has_background(
             row,
-            ("󰈙", row.label, "+"),
+            ("", row.label, "+"),
             (48, 48, 48),
         ):
             return "Selected background did not span the ignored row"
@@ -328,12 +391,12 @@ def pinned_row_keeps_ordinary_status_layers(grove: GroveDriver, name: str) -> No
             None
             if (row := frame.row(scenario_path(name))) is not None
             and "▾" in row.text
-            and "" in row.text
+            and "" in row.text
             and "+" in row.text
             and row.git_mark == "\u258d"
             and _rgb(row.git_mark_style.color) == (255, 255, 0)
             and row.foreground_at("+") == (0, 255, 255)
-            and _has_background(row, ("", row.label, "+"), (48, 48, 48))
+            and _has_background(row, ("", row.label, "+"), (48, 48, 48))
             else f'Pinned row "{name}" lost ordinary status layers'
         ),
     )
@@ -353,11 +416,11 @@ def pinned_background_composes_with_ignored_dimming(
             None
             if (row := frame.row(scenario_path(name))) is not None
             and "▾" in row.text
-            and "" in row.text
+            and "" in row.text
             and row.is_dimmed_at(row.label)
-            and not row.is_dimmed_at("")
+            and not row.is_dimmed_at("")
             and not row.is_dimmed_at("▾")
-            and _has_background(row, ("▾", "", row.label), (32, 32, 32))
+            and _has_background(row, ("▾", "", row.label), (32, 32, 32))
             else f'Pinned row "{name}" lost its background or ignored dimming'
         ),
     )

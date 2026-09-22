@@ -132,8 +132,8 @@ directory. When several patterns match, the longest wins, which is what lets
 `*README.md` beat `*.md`. Matching is case sensitive, as it is in `eza`.
 
 Grove reads the foreground and the bold, dim, and italic attributes from a
-rule. It ignores the background, the reversing and hiding attributes, and
-underline. See
+rule. The foreground also paints the row's Entry icon. Grove ignores the
+background, the reversing and hiding attributes, and underline. See
 [ADR 0014](docs/adr/0014-limit-the-entry-palette-to-safe-foreground-parts.md)
 for why.
 
@@ -167,9 +167,9 @@ label.
 Cursor marks use their row colors. Active file marks and Git marks use their
 Theme role foreground and the row background.
 
-File icons keep their selected palette colors on Visible, Pinned, and Cursor
-rows. Neither a Git status nor an Entry palette recolors them. A filesystem error
-can replace the affected error icon foreground.
+An Entry icon takes the foreground its label resolved to, without the label's
+modifiers, the way `eza` paints one. With no Entry palette that is the row
+foreground, so icons stay monochrome until a palette gives each entry a color.
 
 ## Invalid values
 

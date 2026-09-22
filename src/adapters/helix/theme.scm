@@ -16,27 +16,6 @@
       (Color/Indexed (palette.indexed-color-index color))]
     [else #f]))
 
-(define (color-brightness color)
-  (and
-    color
-    (with-handler
-      (lambda (_cause) #f)
-      (+
-        (* 299 (Color-red color))
-        (* 587 (Color-green color))
-        (* 114 (Color-blue color))))))
-
-(define (icon-palette-for background foreground)
-  (define background-brightness (color-brightness background))
-  (define foreground-brightness (color-brightness foreground))
-  (if
-    (cond
-      [background-brightness (>= background-brightness 187500)]
-      [foreground-brightness (<= foreground-brightness 117000)]
-      [else #f])
-    'light
-    'dark))
-
 (define (resolve-color sources role default-scopes property fallback)
   (define source (cdr (assoc role sources)))
   (define candidates
@@ -101,7 +80,4 @@
     'created (foreground 'git-created-foreground plus-scopes Color/Green)
     'unsaved-mark-foreground
     (foreground 'unsaved-mark-foreground '("info") Color/Cyan)
-    'icon-palette
-    (and
-      icons?
-      (icon-palette-for visible-background visible-foreground))))
+    'icons? icons?))

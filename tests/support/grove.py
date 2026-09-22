@@ -45,6 +45,16 @@ class VisibleRow:
         return next((glyph for glyph in "▸▾" if glyph in self.text), None)
 
     @property
+    def icon(self) -> str | None:
+        # Every other leading mark sits below the Private Use Area.
+        glyphs = [
+            character
+            for character in self.text[: self.label_column]
+            if ord(character) >= 0xE000
+        ]
+        return glyphs[-1] if glyphs else None
+
+    @property
     def git_mark(self) -> str:
         return self.text[0:1]
 

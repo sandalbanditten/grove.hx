@@ -1,6 +1,31 @@
 # TODO
-- When opening multiple files on startup, i.e. with `src/**/*.rs`, the grove sidebar only has the directory of the first opened file unfolded, instead of all applicable.
 - Use the same icons as `eza`
-- There is rendering issues when using PgUp and PgDn to scroll in the grove viewport; the background of a small top portion becomes another color than the default, in my case transparent
+- Add a `?` keybind to list keybinds in the viewport
+- Add a keybind to run `xdg-open` on a file
+
+## Eza Style Rendering
+Make the rendering more consistent with eza.
+For example, this
+```
+  │ ▾  adapters     
+  │ │ ▸  git        
+  │ │ ▸  helix      
+  │ │ · 󰘧 git.scm    
+  │ │ · 󰘧 helix.scm  
+  │ │ · 󰘧 scanner.scm
+  │ ▸  domain       
+```
+should be
+```
+  ├─▾  adapters
+  │   ├─▸  git
+  │   ├── 󰘧 git.scm
+  │   ├─▸  helix
+  │   ├── 󰘧 helix.scm
+  │   └── 󰘧 scanner.scm
+  └─▸  domain
+```
+Note the completely alphabetical order, dirs not stacking at the top.
+The alphabetical order should be available as a config toggle.
 
 
