@@ -24,18 +24,41 @@
     [(equal? kind 'broken-link) "󰌺"]
     [else #f]))
 
-(define (ancestor-trace-indent depth)
+; Guides draw what `eza --tree` draws. Every ancestor level takes four
+; columns: a lane while that ancestor still has siblings to come, blanks once
+; its subtree is finished. The row's own Branch then takes three, and its last
+; column carries the expansion control, the Active file mark, or a plain stem.
+(define (lane-text continues? guides)
   (cond
-    [(<= depth 1) ""]
-    [else
-      (string-append "│ " (ancestor-trace-indent (- depth 1)))]))
+    [(not guides) "    "]
+    [continues? "│   "]
+    [else "    "]))
 
-(define (ancestry-indent entry guides)
-  (define depth (path.depth (tree.entry-id entry)))
-  (if
-    guides
-    (ancestor-trace-indent depth)
-    (make-string (* 2 (max 0 (- depth 1))) #\space)))
+(define (lane-runs entry current-facts guides guides-style)
+  (map
+    (lambda (continues?) (run (lane-text continues? guides) guides-style))
+    (row.lanes current-facts entry)))
+
+(define (branch-text last? guides)
+  (cond
+    [(not guides) "  "]
+    [last? "└─"]
+    [else "├─"]))
+
+(define (branch-tip-runs entry
+         current-facts
+         guides
+         guides-style
+         active-file-style)
+  (cond
+    [(tree.expandable? entry)
+      (list
+        (run
+          (if (row.expanded? current-facts entry) "▾" "▸")
+          guides-style))]
+    [(row.active-file? current-facts entry)
+      (list (run "*" active-file-style))]
+    [else (list (run (if guides "─" " ") guides-style))]))
 
 (define (row-colors-for slot current-facts current-theme)
   (define entry (layout.slot-entry slot))
@@ -74,24 +97,29 @@
       active-file-foreground
       (style-fg base-style active-file-foreground)
       base-style))
-  (append
+  (define marks
     (list
       (git-mark-run
         (row.git-status current-facts entry)
         current-theme
         base-style)
-      (run (if (row.cursor? current-facts entry) ">" " ") base-style)
-      (run (ancestry-indent entry guides) guides-style))
-    (cond
-      [(path.root-id? (tree.entry-id entry)) '()]
-      [(tree.expandable? entry)
-        (list
-          (run
-            (if (row.expanded? current-facts entry) "▾" "▸")
-            base-style))]
-      [(row.active-file? current-facts entry)
-        (list (run "*" active-file-style))]
-      [else (list (run (if guides "·" " ") guides-style))])))
+      (run (if (row.cursor? current-facts entry) ">" " ") base-style)))
+  (if
+    (path.root-id? (tree.entry-id entry))
+    marks
+    (append
+      marks
+      (lane-runs entry current-facts guides guides-style)
+      (list
+        (run
+          (branch-text (row.last-sibling? current-facts entry) guides)
+          guides-style))
+      (branch-tip-runs
+        entry
+        current-facts
+        guides
+        guides-style
+        active-file-style))))
 
 (define (fit-runs source-runs width base-style)
   (let loop ([remaining source-runs] [left width] [result '()])

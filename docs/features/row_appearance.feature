@@ -12,10 +12,10 @@ Feature: Present File tree rows
     And "folder" uses the directory icon
     And "anchor.txt" uses the file icon
     And "anchor.txt" aligns with "folder" in icon mode
-    And the Workspace label starts in column 5 and "folder" and "anchor.txt" labels start in column 7
+    And the Workspace label starts in column 5 and "folder" and "anchor.txt" labels start in column 9
     And "folder" can expand
     When the "folder" directory is expanded
-    Then "folder/inside.txt" is indented two columns from "folder"
+    Then "folder/inside.txt" is indented 4 columns from "folder"
 
   Scenario: Name entries with the icons eza ships
     Given a Workspace containing entries
@@ -51,17 +51,21 @@ Feature: Present File tree rows
       | file      | outer/inner/inside.txt |
     And "anchor.txt" is Active
     When Helix starts with Grove in that Workspace
-    Then the Workspace root has neither an Ancestor trace nor a Leaf mark
-    And "anchor.txt" uses 0 Ancestor traces
-    And "anchor.txt" uses 0 Leaf marks
+    Then the Workspace root has no Branch
+    And "anchor.txt" uses 0 Ancestor lanes
+    And "anchor.txt" ends its sibling run
     And "anchor.txt" uses the Active file mark
     And "anchor.txt" uses the file icon
     When the "outer" directory is expanded
     And the "outer/inner" directory is expanded
-    Then "outer/inner" uses 1 Ancestor trace
-    And "outer/inner/inside.txt" uses 2 Ancestor traces
-    And "outer/inner/inside.txt" uses 1 Leaf mark
-    And the Ancestor traces and Leaf mark on "outer/inner/inside.txt" use the theme Guides foreground
+    Then "outer/inner" uses 1 Ancestor lane
+    And "outer/inner" ends its sibling run
+    And "outer/inner/inside.txt" uses 2 Ancestor lanes
+    And "outer/inner/inside.txt" draws 1 Ancestor lane
+    And "outer/inner/inside.txt" ends its sibling run
+    And "outer/inner/inside.txt" has a plain Branch tip
+    And the Guides on "outer/inner/inside.txt" use the theme Guides foreground
+    And the Guides on "outer/inner" use the theme Guides foreground
 
   Scenario: Disable guides
     Given a Workspace containing entries
@@ -77,11 +81,11 @@ Feature: Present File tree rows
       | icons   | disabled |
       | guides  | disabled |
     When Helix starts with Grove in that Workspace
-    Then "anchor.txt" uses 0 Leaf marks
-    And "anchor.txt" uses the Active file mark
+    Then "anchor.txt" uses the Active file mark
     When the "outer" directory is expanded
-    Then "outer/inside.txt" uses 0 Ancestor traces
-    And "outer/inside.txt" uses 0 Leaf marks
+    Then "outer/inside.txt" has no Branch
+    And "outer/inside.txt" draws 0 Ancestor lanes
+    And "outer/inside.txt" is indented 4 columns from "outer"
 
   Scenario: Present Cursor and Active file marks without shifting rows
     Given a Workspace containing entries

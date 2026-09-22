@@ -3,11 +3,14 @@
 (require (prefix-in path. "path.scm"))
 (require (prefix-in expansion. "expansion.scm"))
 (require (prefix-in palette. "palette.scm"))
+(require (prefix-in guides. "guides.scm"))
 
 (provide facts
   label
   natural-width
   appearance
+  lanes
+  last-sibling?
   git-status
   unsaved-status
   active-file?
@@ -15,12 +18,18 @@
   expanded?)
 
 (struct facts
-  (root git-status unsaved-ids active-id cursor expansion palette))
+  (root git-status unsaved-ids active-id cursor expansion palette guides))
 
 (define (label current-facts entry)
   (define id (tree.entry-id entry))
   (path.basename
     (if (path.root-id? id) (facts-root current-facts) id)))
+
+(define (lanes current-facts entry)
+  (guides.lanes (facts-guides current-facts) (tree.entry-id entry)))
+
+(define (last-sibling? current-facts entry)
+  (guides.last-sibling? (facts-guides current-facts) (tree.entry-id entry)))
 
 (define (icon-area-width root? icons?)
   (cond
@@ -31,10 +40,10 @@
 ; ADR 0012 keeps arithmetic within the arity Steel's JIT compiles.
 (define (fixed-width id root? icons?)
   (+
-    ; Git mark, Cursor mark, expansion control, and Unsaved mark
-    (if root? 3 4)
-    ; Ancestor traces
-    (* 2 (max 0 (- (path.depth id) 1)))
+    ; Git mark, Cursor mark, Branch, and Unsaved mark
+    (if root? 3 6)
+    ; Ancestor lanes
+    (* 4 (max 0 (- (path.depth id) 1)))
     (icon-area-width root? icons?)))
 
 ; Grove builds every row from the same fixed parts, so the columns one row

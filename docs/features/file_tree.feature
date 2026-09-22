@@ -66,9 +66,47 @@ Feature: Keep the File tree current
     And "file-link" uses the File link icon
     And "directory-link" uses the directory icon
     And "broken-link" uses the Broken link icon
-    And "file-link" uses 1 Leaf mark
-    And "directory-link" uses 1 Leaf mark
-    And "broken-link" uses 1 Leaf mark
+    And "file-link" has a plain Branch tip
+    And "directory-link" has a plain Branch tip
+    And "broken-link" has a plain Branch tip
+
+  Scenario: Group directories ahead of files
+    Given a Workspace containing entries
+      | kind      | path      |
+      | file      | alpha.txt |
+      | directory | beta      |
+      | directory | delta     |
+      | file      | gamma.txt |
+    And "alpha.txt" is Active
+    And Grove settings
+      | setting | value             |
+      | sort    | directories-first |
+    When Helix starts with Grove in that Workspace
+    Then File tree rows appear in order
+      | name      |
+      | beta      |
+      | delta     |
+      | alpha.txt |
+      | gamma.txt |
+
+  Scenario: Interleave directories with files by name
+    Given a Workspace containing entries
+      | kind      | path      |
+      | file      | alpha.txt |
+      | directory | beta      |
+      | directory | delta     |
+      | file      | gamma.txt |
+    And "alpha.txt" is Active
+    And Grove settings
+      | setting | value        |
+      | sort    | alphabetical |
+    When Helix starts with Grove in that Workspace
+    Then File tree rows appear in order
+      | name      |
+      | alpha.txt |
+      | beta      |
+      | delta     |
+      | gamma.txt |
 
   Scenario: Reclassify a link when its external target appears
     Given a Workspace containing entries

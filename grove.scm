@@ -74,6 +74,10 @@
 (define (start-width value)
   (if (fit-width? value) 32 value))
 
+; `alphabetical` lists directories among files the way `eza` does.
+(define (valid-sort? value)
+  (and (member value '(directories-first alphabetical)) #t))
+
 (define (valid-ls-colors? value)
   (or
     (not value)
@@ -86,7 +90,8 @@
          guides?
          visibility
          theme
-         ls-colors)
+         ls-colors
+         sort)
   (unless (or (equal? side 'left) (equal? side 'right))
     (error "invalid Grove side"))
   (unless (valid-width? width)
@@ -102,7 +107,9 @@
   (unless (valid-theme-sources? (grove-theme-value-sources theme))
     (error "invalid Grove theme source"))
   (unless (valid-ls-colors? ls-colors)
-    (error "invalid Grove LS_COLORS")))
+    (error "invalid Grove LS_COLORS"))
+  (unless (valid-sort? sort)
+    (error "invalid Grove sort")))
 
 (define (grove-start! #:icons [icons? #t]
          #:guides
@@ -116,8 +123,18 @@
          #:width
          [width 32]
          #:ls-colors
-         [ls-colors #f])
-  (validate-settings side width icons? guides? visibility theme ls-colors)
+         [ls-colors #f]
+         #:sort
+         [sort 'directories-first])
+  (validate-settings
+    side
+    width
+    icons?
+    guides?
+    visibility
+    theme
+    ls-colors
+    sort)
   (helix.start!
     side
     (start-width width)
@@ -126,7 +143,8 @@
     visibility
     (grove-theme-value-sources theme)
     ls-colors
-    (fit-width? width)))
+    (fit-width? width)
+    (equal? sort 'directories-first)))
 
 ;;@doc
 ;;Focus Grove.

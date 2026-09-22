@@ -22,6 +22,8 @@ _SETTING_VALUES = {
     "non-boolean": "'enabled",
     "environment": "'environment",
     "fit": "'fit",
+    "directories-first": "'directories-first",
+    "alphabetical": "'alphabetical",
 }
 
 

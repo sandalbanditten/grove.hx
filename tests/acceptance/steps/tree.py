@@ -129,27 +129,68 @@ def workspace_root_uses_one_icon(grove: GroveDriver) -> None:
     assert row.disclosure is None and "" not in row.text
 
 
-@then("the Workspace root has neither an Ancestor trace nor a Leaf mark")
-def workspace_root_has_no_ancestor_trace_or_leaf_mark(grove: GroveDriver) -> None:
+@then("the Workspace root has no Branch")
+def workspace_root_has_no_branch(grove: GroveDriver) -> None:
     frame = _frame_with_rows(grove)
     row = frame.pane.workspace_root if frame.pane else None
     assert row is not None
-    assert "│" not in row.text[: row.label_column]
-    assert "·" not in row.text[: row.label_column]
+    leading = row.text[: row.label_column]
+    assert not any(glyph in leading for glyph in "│├└─")
 
 
-@then(
-    parsers.re(
-        r'^"(?P<name>.+)" uses (?P<count>\d+) '
-        r"(?P<kind>Ancestor trace|Leaf mark)s?$"
-    )
-)
-def entry_uses_guides(grove: GroveDriver, name: str, count: str, kind: str) -> None:
+_MARK_COLUMNS = 2
+_LANE_COLUMNS = 4
+
+
+def _branch_column(row: VisibleRow) -> int:
+    leading = row.text[: row.label_column]
+    columns = [leading.find(glyph) for glyph in "├└" if glyph in leading]
+    return min(columns) if columns else len(leading)
+
+
+@then(parsers.re(r'^"(?P<name>.+)" uses (?P<count>\d+) Ancestor lanes?$'))
+def entry_uses_ancestor_lanes(grove: GroveDriver, name: str, count: str) -> None:
     frame = _frame_with_rows(grove, name)
     row = _visible_row(frame, name)
     assert row is not None
-    glyph = "│" if kind == "Ancestor trace" else "·"
-    assert row.text[: row.label_column].count(glyph) == int(count)
+    reserved = _branch_column(row) - _MARK_COLUMNS
+    assert reserved % _LANE_COLUMNS == 0, reserved
+    assert reserved // _LANE_COLUMNS == int(count)
+
+
+@then(parsers.re(r'^"(?P<name>.+)" draws (?P<count>\d+) Ancestor lanes?$'))
+def entry_draws_ancestor_lanes(grove: GroveDriver, name: str, count: str) -> None:
+    frame = _frame_with_rows(grove, name)
+    row = _visible_row(frame, name)
+    assert row is not None
+    assert row.text[: _branch_column(row)].count("│") == int(count)
+
+
+@then(parsers.re(r'^"(?P<name>.+)" (?P<position>continues|ends) its sibling run$'))
+def entry_branch_position(grove: GroveDriver, name: str, position: str) -> None:
+    frame = _frame_with_rows(grove, name)
+    row = _visible_row(frame, name)
+    assert row is not None
+    expected = "├─" if position == "continues" else "└─"
+    assert expected in row.text[: row.label_column]
+
+
+@then(parsers.re(r'^"(?P<name>.+)" has no Branch$'))
+def entry_has_no_branch(grove: GroveDriver, name: str) -> None:
+    frame = _frame_with_rows(grove, name)
+    row = _visible_row(frame, name)
+    assert row is not None
+    leading = row.text[: row.label_column]
+    assert not any(glyph in leading for glyph in "│├└─")
+
+
+@then(parsers.re(r'^"(?P<name>.+)" has a plain Branch tip$'))
+def entry_has_plain_branch_tip(grove: GroveDriver, name: str) -> None:
+    frame = _frame_with_rows(grove, name)
+    row = _visible_row(frame, name)
+    assert row is not None
+    leading = row.text[: row.label_column]
+    assert "├──" in leading or "└──" in leading
 
 
 @then(parsers.parse('"{name}" uses the Active file mark'))
@@ -162,7 +203,7 @@ def entry_uses_active_file_mark(grove: GroveDriver, name: str) -> None:
         leading = row.text[: row.label_column]
         return (
             None
-            if leading.count("*") == 1 and "·" not in leading
+            if leading.count("*") == 1 and not leading.endswith("──")
             else f'"{name}" did not use the Active file mark'
         )
 
@@ -224,22 +265,21 @@ def active_file_mark_uses_info_on_cursor(grove: GroveDriver) -> None:
 
 @then(
     parsers.re(
-        r'^the Ancestor traces? and Leaf mark on "(?P<name>.+)" '
+        r'^the Guides on "(?P<name>.+)" '
         r"use the (?P<source>theme Guides|terminal gray) foreground$"
     )
 )
-def ancestor_traces_and_leaf_mark_use_foreground(
-    grove: GroveDriver,
-    name: str,
-    source: str,
-) -> None:
+def guides_use_foreground(grove: GroveDriver, name: str, source: str) -> None:
     frame = _frame_with_rows(grove, name)
     row = _visible_row(frame, name)
     assert row is not None
     foreground = (136, 136, 136) if source == "theme Guides" else (128, 128, 128)
-    assert row.foreground_at("│") == foreground
-    assert row.foreground_at("·") == foreground
-    assert not any((row.is_dimmed_at("│"), row.is_dimmed_at("·")))
+    leading = row.text[: row.label_column]
+    glyphs = [glyph for glyph in "│├└─▾▸" if glyph in leading]
+    assert glyphs, "row showed no Guides"
+    for glyph in glyphs:
+        assert row.foreground_at(glyph) == foreground, glyph
+        assert not row.is_dimmed_at(glyph), glyph
 
 
 @then(parsers.parse('"{file}" aligns with "{directory}" in icon mode'))
@@ -254,7 +294,7 @@ def icon_mode_entries_align(grove: GroveDriver, file: str, directory: str) -> No
 @then(
     parsers.parse(
         'the Workspace label starts in column 5 and "{directory}" and "{file}" '
-        "labels start in column 7"
+        "labels start in column 9"
     )
 )
 def icon_label_columns(grove: GroveDriver, directory: str, file: str) -> None:
@@ -263,8 +303,8 @@ def icon_label_columns(grove: GroveDriver, directory: str, file: str) -> None:
     directory_row = frame.row(scenario_path(directory))
     file_row = frame.row(scenario_path(file))
     assert root is not None and root.label_column == 4
-    assert directory_row is not None and directory_row.label_column == 6
-    assert file_row is not None and file_row.label_column == 6
+    assert directory_row is not None and directory_row.label_column == 8
+    assert file_row is not None and file_row.label_column == 8
 
 
 @then(parsers.parse('"{name}" can expand'))
@@ -277,13 +317,19 @@ def entry_cannot_expand(grove: GroveDriver, name: str) -> None:
     _wait_for_disclosure(grove, name, None)
 
 
-@then(parsers.parse('"{child}" is indented two columns from "{parent}"'))
-def child_is_indented(grove: GroveDriver, child: str, parent: str) -> None:
+@then(
+    parsers.re(
+        r'^"(?P<child>.+)" is indented (?P<columns>\d+) columns from "(?P<parent>.+)"$'
+    )
+)
+def child_is_indented(
+    grove: GroveDriver, child: str, columns: str, parent: str
+) -> None:
     frame = _frame_with_rows(grove, child, parent)
     child_row = frame.row(scenario_path(child))
     parent_row = frame.row(scenario_path(parent))
     assert child_row is not None and parent_row is not None
-    assert child_row.label_column == parent_row.label_column + 2
+    assert child_row.label_column == parent_row.label_column + int(columns)
 
 
 @then(
@@ -303,8 +349,8 @@ def labels_reclaim_icon_columns(
     file_row = frame.row(scenario_path(file))
     assert root is not None and root.label == workspace.root.name
     assert root.label_column == 2
-    assert directory_row is not None and directory_row.label_column == 4
-    assert file_row is not None and file_row.label_column == 4
+    assert directory_row is not None and directory_row.label_column == 6
+    assert file_row is not None and file_row.label_column == 6
 
 
 def _frame_with_rows(grove: GroveDriver, *names: str) -> GroveFrame:

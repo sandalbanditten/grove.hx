@@ -120,9 +120,11 @@ _Avoid_: LS_COLORS theme, file colors
 
 **File tree**:
 One immutable ordered filesystem hierarchy containing the entries currently
-known to Grove from the latest Observation snapshot. Its Workspace root is a
-separate identity. Collapse does not edit this hierarchy. Expansion controls
-which known descendants become Visible rows; a later observation may replace
+known to Grove from the latest Observation snapshot. Entries within a directory
+are ordered naturally by name; `directories-first` groups directories ahead of
+files first, while `alphabetical` interleaves them the way `eza` lists them. Its
+Workspace root is a separate identity. Collapse does not edit this hierarchy.
+Expansion controls which known descendants become Visible rows; a later observation may replace
 the hierarchy with a scan that did not traverse a collapsed directory.
 _Avoid_: Tree state, session
 
@@ -183,26 +185,31 @@ _Avoid_: Cursor prefix, selection arrow
 
 **Active file mark**:
 The single `*` presenting the Active file when it is Visible. It occupies the
-Leaf mark position and remains visible when Guides are disabled.
+Branch's final column and remains visible when Guides are disabled.
 _Avoid_: Current buffer flag, Active marker
 
 **Guides**:
 The visual cues before File tree labels that expose ancestry and expansion
-capability. Ancestor traces follow non-root directories through nested rows;
-Leaf marks identify non-root rows that cannot expand. Cursor and Active file
-marks are independent of Guides.
+capability, drawn in the shape `eza --tree` draws. Every non-root Visible row
+ends its guides with a Branch; one Ancestor lane precedes it for each non-root
+ancestor. Disabling Guides blanks both while keeping every column, so labels
+stay aligned and the expansion control stays visible. The Cursor mark is
+independent of Guides.
 _Avoid_: Decoration, Hierarchy decoration
 
-**Ancestor trace**:
-The muted vertical stroke representing one non-root ancestor directory of a
-Visible row. The Workspace root contributes none.
-_Avoid_: Hierarchy guide, Indent guide, Folder level line, tree branch
+**Ancestor lane**:
+The four columns a Visible row reserves for one non-root ancestor directory. A
+lane carries a muted vertical stroke while that ancestor still has siblings
+below it, and falls blank once its subtree is finished. The Workspace root
+contributes none.
+_Avoid_: Ancestor trace, Hierarchy guide, Indent guide, Folder level line
 
-**Leaf mark**:
-The single leading `·` identifying a non-root Visible row without an expansion
-control. It occupies that control's position without replacing the entry icon;
-the Active file mark replaces it when both apply.
-_Avoid_: File dot, bullet
+**Branch**:
+The three columns joining a non-root Visible row to its parent: `├─` while
+later siblings follow, `└─` for the last of them. Its final column carries the
+expansion control on an expandable row, the Active file mark on the Active
+file, and a plain stem otherwise.
+_Avoid_: Leaf mark, connector, tree stem
 
 **Visible row**:
 One semantic filesystem entry in the current File tree. Its stable identity

@@ -69,7 +69,10 @@
             (scan-entry (car remaining) parent-id expansion-value)
             result))))))
 
-(define (scan root expansion-value)
+(define (scan root expansion-value directories-first?)
   (define entries
     (scan-directory root path.root-id expansion-value))
-  (if entries (tree.build entries) (tree.unreadable-root)))
+  (if
+    entries
+    (tree.build entries directories-first?)
+    (tree.unreadable-root)))

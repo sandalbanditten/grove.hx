@@ -1,6 +1,9 @@
 SCHEMAT ?= schemat
 # Schemat 0.5.3 cannot parse Steel's "\0" escape.
-SCHEMAT_FLAGS = --ignore src/adapters/git/porcelain.scm --ignore src/domain/path.scm
+# The icon catalog is generated; tools/icons/generate.py owns its layout.
+SCHEMAT_FLAGS = --ignore src/adapters/git/porcelain.scm \
+                --ignore src/domain/path.scm \
+                --ignore src/domain/icons/catalog.scm
 
 .PHONY: format lint test icons
 

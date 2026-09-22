@@ -28,6 +28,7 @@ Feature: Start Grove
       | icons      | non-boolean | Grove icons must be a boolean  |
       | guides     | non-boolean | Grove guides must be a boolean |
       | visibility | middle      | invalid Grove visibility       |
+      | sort       | middle      | invalid Grove sort             |
 
   Scenario: Reject a second start
     Given Grove starts twice

@@ -40,7 +40,10 @@
       (path.ids-for-paths observed-root revealed-paths)))
   (model.observation-snapshot
     observed-root
-    (scanner.scan observed-root scan-scope)
+    (scanner.scan
+      observed-root
+      scan-scope
+      (model.directories-first? model-at-observation))
     (git.observe observed-root)
     active-id))
 
@@ -197,7 +200,14 @@
     (> (string-length (trim text)) 0)
     (palette.parse text)))
 
-(define (start-runtime! side width icons? guides? visibility ls-colors fit?)
+(define (start-runtime! side
+         width
+         icons?
+         guides?
+         visibility
+         ls-colors
+         fit?
+         directories-first?)
   (set! *model*
     (model.init
       side
@@ -205,7 +215,8 @@
       icons?
       guides?
       visibility
-      (entry-palette-for ls-colors)))
+      (entry-palette-for ls-colors)
+      directories-first?))
   (component.install! side render-current! handle-event!)
   (hooks.install! dispatch!)
   (set! *fit-width?* fit?)
@@ -220,7 +231,8 @@
          visibility
          theme-sources
          ls-colors
-         fit-width?)
+         fit-width?
+         directories-first?)
   (when *started?*
     (error "Grove has already started"))
   (set! *started?* #t)
@@ -234,7 +246,8 @@
         guides?
         visibility
         ls-colors
-        fit-width?)))
+        fit-width?
+        directories-first?)))
   #t)
 
 (define (enqueue-after-start! action)

@@ -49,7 +49,8 @@
       (file "item-08")
       (file "item-09")
       (file "item-10")
-      (file "item-11"))))
+      (file "item-11"))
+    #t))
 
 (define flat-entries
   (expansion.visible
@@ -128,7 +129,8 @@
       (file "outer/inner/file-03")
       (file "tail-00")
       (file "tail-01")
-      (file "tail-02"))))
+      (file "tail-02"))
+    #t))
 
 (define nested-expansion
   (expansion.expand
@@ -188,7 +190,7 @@
         (loop (+ height 1))))))
 
 (define initial-model
-  (model.init 'left 16 #t #t 'always #f))
+  (model.init 'left 16 #t #t 'always #f #t))
 
 (define (updated model-value transition . arguments)
   (model.update-result-model
@@ -372,7 +374,7 @@
   (map tree.entry-id file-tree))
 
 (define ascending-scan
-  (tree.build (map file (ordered-ids ORDER-SIZE))))
+  (tree.build (map file (ordered-ids ORDER-SIZE)) #t))
 
 (check
   "an ordered scan keeps its own order"
@@ -385,10 +387,10 @@
   (and
     (equal?
       (ids-of ascending-scan)
-      (ids-of (tree.build (map file (scrambled-ids ORDER-SIZE)))))
+      (ids-of (tree.build (map file (scrambled-ids ORDER-SIZE)) #t)))
     (equal?
       (ids-of ascending-scan)
-      (ids-of (tree.build (map file (reverse (ordered-ids ORDER-SIZE))))))))
+      (ids-of (tree.build (map file (reverse (ordered-ids ORDER-SIZE))) #t)))))
 
 (define (directory-run? file-tree)
   (let loop ([remaining (cdr file-tree)] [seen-file? #f])
@@ -403,7 +405,7 @@
   (let loop ([index 0] [result '()])
     (if
       (= index limit)
-      (tree.build result)
+      (tree.build result #t)
       (let ([value (modulo (* index 7919) limit)])
         (loop
           (+ index 1)

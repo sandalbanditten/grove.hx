@@ -95,7 +95,7 @@ Feature: Size and place the Pane
 
     Examples:
       | entry                             | expected |
-      | a-considerably-long-file-name.txt | 41       |
+      | a-considerably-long-file-name.txt | 43       |
       | a.txt                             | 16       |
 
   Scenario Outline: Fit the width to the widest Visible row
@@ -115,12 +115,12 @@ Feature: Size and place the Pane
 
     Examples:
       | entry                             | terminal | expected |
-      | a-considerably-long-file-name.txt | 100      | 41       |
-      | readme-notes.txt                  | 100      | 24       |
+      | a-considerably-long-file-name.txt | 100      | 43       |
+      | readme-notes.txt                  | 100      | 26       |
       | a-considerably-long-file-name.txt | 36       | 35       |
       | a.txt                             | 100      | 16       |
 
-  Scenario: Fit the width around Ancestor traces without clipping
+  Scenario: Fit the width around Ancestor lanes without clipping
     Given a Workspace containing entries
       | kind      | path                  |
       | file      | anchor.txt            |
@@ -135,11 +135,11 @@ Feature: Size and place the Pane
     And the "outer" directory is expanded
     And Grove is focused
     And Grove receives "="
-    Then Grove has width 25
+    Then Grove has width 29
     And no File tree row is clipped
     When the "outer" directory is collapsed
     And Grove receives "="
-    Then Grove has width 18
+    Then Grove has width 20
     And no File tree row is clipped
 
   Scenario: Fit the width with icons disabled
@@ -155,7 +155,7 @@ Feature: Size and place the Pane
     When Helix starts with Grove in that Workspace
     And Grove is focused
     And Grove receives "="
-    Then Grove has width 22
+    Then Grove has width 24
     And no File tree row is clipped
 
   Scenario Outline: Resize from the Rail on either side

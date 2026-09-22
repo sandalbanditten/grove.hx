@@ -74,11 +74,12 @@ file picker before Steel components mount.
 | Setting | Default | Values | Effect |
 | --- | --- | --- | --- |
 | `#:icons` | `#t` | `#t` or `#f` | Shows entry icons, using the glyphs `eza` ships. Requires a terminal font with Nerd Fonts 3.3 glyphs. |
-| `#:guides` | `#t` | `#t` or `#f` | Shows ancestor traces and Leaf marks. Cursor (`>`) and Active file (`*`) marks remain visible when disabled. |
+| `#:guides` | `#t` | `#t` or `#f` | Draws the tree lines `eza --tree` draws. Columns stay reserved when disabled, so rows keep their alignment and the expansion controls, Cursor (`>`), and Active file (`*`) marks remain visible. |
 | `#:ls-colors` | `#f` | `#f`, `'environment`, or an `LS_COLORS` string | Colors entry labels from an `LS_COLORS` palette, the way `eza` does. `'environment` reads `LS_COLORS` then `EZA_COLORS` at startup. See [THEMING.md](THEMING.md). |
 | `#:side` | `'left` | `'left` or `'right` | Places Grove on that side of the editor. |
 | `#:theme` | `(grove-theme)` | A `grove-theme` value | Follows the active Helix theme by default. See [THEMING.md](THEMING.md) for role and color overrides. |
 | `#:width` | `32` | `16` through `64`, or `'fit` | Sets the total width, including the Rail that separates Grove from the editor and acts as its scrollbar. `'fit` starts as wide as the widest entry needs, the way `=` resizes later. |
+| `#:sort` | `'directories-first` | `'directories-first` or `'alphabetical` | Groups directories ahead of files, or interleaves them by name the way `eza` lists them. |
 | `#:visibility` | `'always` | `'always` or `'focused` | Keeps the Pane visible, or shows it only while Grove is focused. |
 
 For example:

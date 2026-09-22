@@ -3,6 +3,7 @@
 (require (prefix-in path. "path.scm"))
 (require (prefix-in tree. "tree.scm"))
 (require (prefix-in row. "row.scm"))
+(require (prefix-in guides. "guides.scm"))
 
 (provide init
   root
@@ -11,6 +12,7 @@
   row-facts
   icons?
   guides?
+  directories-first?
   focused?
   plan-file-tree-scan
   observation-snapshot
@@ -50,7 +52,8 @@
     icons?
     guides?
     visibility
-    palette))
+    palette
+    directories-first?))
 
 (struct observation-snapshot (root tree git-status active-id))
 
@@ -63,6 +66,7 @@
 (define root model-value-root)
 (define icons? model-value-icons?)
 (define guides? model-value-guides?)
+(define directories-first? model-value-directories-first?)
 (define (focused? model)
   (and (model-value-cursor model) #t))
 
@@ -125,7 +129,8 @@
     (model-value-icons? model)
     (model-value-guides? model)
     visibility-value
-    (model-value-palette model)))
+    (model-value-palette model)
+    (model-value-directories-first? model)))
 
 (define (without-focus model)
   (copy-model model #:cursor #f))
@@ -146,7 +151,8 @@
     (model-value-active-id model)
     (model-value-cursor model)
     (model-value-expansion model)
-    (model-value-palette model)))
+    (model-value-palette model)
+    (guides.plan (visible-entries model))))
 
 (define (resolved-layout-for model entries)
   (layout.resolve
@@ -177,7 +183,8 @@
          icons-value
          guides-value
          visibility-value
-         palette-value)
+         palette-value
+         directories-first-value)
   (model-value
     #f
     #f
@@ -193,7 +200,8 @@
     icons-value
     guides-value
     visibility-value
-    palette-value))
+    palette-value
+    directories-first-value))
 
 (define (first-surviving-id entries new-ids)
   (define found
