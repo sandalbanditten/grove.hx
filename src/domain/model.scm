@@ -17,6 +17,8 @@
   host-observed
   focus-frame-observed
   observation-received
+  first-observation-received
+  reveal-frame-observed
   unsaved-observed
   save-started
   geometry-observed
@@ -559,6 +561,40 @@
       (install-geometry
         (install-observation-snapshot model snapshot)
         geometry-value))
+    #f))
+
+; Grove's first observation opens the Workspace on the Active file. Expanding
+; needs only the File tree, so it happens here; anchoring needs Host geometry,
+; so it waits for the first frame. Neither step takes Cursor.
+(define (expanded-to-active model)
+  (define active-id (activatable-active-id model))
+  (if
+    (not active-id)
+    model
+    (copy-model
+      model
+      #:expansion
+      (expansion.expand-ancestors (model-value-expansion model) active-id))))
+
+(define (first-observation-received model snapshot)
+  (update-result
+    (expanded-to-active (install-observation-snapshot model snapshot))
+    #f))
+
+(define (revealed-model model)
+  (define active-id (activatable-active-id model))
+  (define current-layout (and active-id (resolved-layout model)))
+  (if
+    current-layout
+    (copy-model
+      model
+      #:anchor
+      (layout.reveal current-layout active-id 'first))
+    model))
+
+(define (reveal-frame-observed model geometry-value)
+  (update-result
+    (revealed-model (install-geometry model geometry-value))
     #f))
 
 (define (observation-received model snapshot)

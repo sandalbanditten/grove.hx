@@ -61,6 +61,30 @@ Feature: Start Grove
     When the editor receives "i" while Grove is unfocused
     Then the active Editor view is in Insert mode
 
+  Scenario: Open the Workspace on the Active file
+    Given a Workspace containing entries
+      | kind | path                   |
+      | file | anchor.txt             |
+      | file | outer/inner/active.txt |
+    And "outer/inner/active.txt" is Active
+    When Helix starts with Grove in that Workspace
+    Then the File tree shows "outer/inner/active.txt"
+    And "outer" remains expanded
+    And "outer/inner" remains expanded
+    And "outer/inner/active.txt" uses the Active file mark
+    And "outer/inner/active.txt" has no Cursor mark
+    When the editor receives "i" while Grove is unfocused
+    Then the active Editor view is in Insert mode
+
+  Scenario: Open a tall Workspace scrolled to the Active file
+    Given a Workspace containing entries
+      | kind | path                        | count |
+      | file | outer/inner/item-{:02d}.txt | 40    |
+    And "outer/inner/item-39.txt" is Active
+    When Helix starts with Grove in that Workspace
+    Then the File tree shows "outer/inner/item-39.txt"
+    And "outer/inner/item-39.txt" has no Cursor mark
+
   Scenario: Start Docked without taking editor focus
     Given a Workspace containing entries
       | kind      | path              |

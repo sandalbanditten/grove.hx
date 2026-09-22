@@ -1,15 +1,20 @@
 Feature: Activate files
 
-  Scenario: Reveal a nested Active file only when Grove is focused
+  Scenario: Open on the Active file and leave a later one folded
     Given a Workspace containing entries
       | path                   |
       | outer/inner/active.txt |
+      | other/later.txt        |
     And "outer/inner/active.txt" is Active
-    When Helix starts with Grove in that Workspace
-    Then the File tree does not show "outer/inner/active.txt"
-    When Grove is focused
+    When Helix starts with Grove ready for an Active file change to "other/later.txt"
     Then the File tree shows "outer/inner/active.txt"
-    And "outer/inner/active.txt" has Cursor
+    And "outer/inner/active.txt" has no Cursor mark
+    When Helix changes the Active file to "other/later.txt"
+    Then Helix shows the "other/later.txt" document
+    And the File tree does not show "other/later.txt"
+    When Grove is focused
+    Then the File tree shows "other/later.txt"
+    And "other/later.txt" has Cursor
 
   Scenario: Reveal an off-screen Active file when Grove is focused
     Given a Workspace containing entries
@@ -18,8 +23,6 @@ Feature: Activate files
     And "outer/inner/item-05.txt" is Active
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 8 rows
-    And "outer" is activated
-    And "outer/inner" is activated
     And the Wheel scrolls down over Grove
     And the Wheel scrolls down over Grove
     And the Wheel scrolls down over Grove

@@ -23,9 +23,10 @@ _Avoid_: Application state, pane model, presentation model
 **Active file**:
 The Workspace file in Helix's active editor split. Only Host observation changes
 it; an open command never predicts it. Regular refresh does not expand
-or scan through collapsed ancestors only to follow it. Focusing Grove takes a
-complete observation, scans the Active file path, then expands and reveals it
-when Pane is available. When Visible, the Active file mark identifies it while
+or scan through collapsed ancestors only to follow it. Grove's first observation
+does: it scans the Active file path, then expands and anchors on it without
+taking Cursor. Focusing Grove takes a complete observation, scans the Active
+file path, then expands and reveals it when Pane is available. When Visible, the Active file mark identifies it while
 its background can follow the active Helix theme. Normal activation only returns
 control to Helix, preserving the editor cursor and viewport. Split activation
 still opens the requested split.

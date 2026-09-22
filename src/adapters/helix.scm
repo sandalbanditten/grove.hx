@@ -21,6 +21,7 @@
 (define *model* #f)
 (define *latest-frame* #f)
 (define *focus-next-frame?* #f)
+(define *reveal-next-frame?* #f)
 (define *started?* #f)
 (define *theme-sources* '())
 
@@ -46,6 +47,12 @@
 (define (refresh-now!)
   (define snapshot (observe *model* #f))
   (dispatch! model.observation-received snapshot))
+
+; Startup scans through the Active file's ancestors so the first tree already
+; holds the path Helix is showing.
+(define (reveal-now!)
+  (define snapshot (observe *model* #t))
+  (dispatch! model.first-observation-received snapshot))
 
 (define (schedule-refresh!)
   (enqueue-thread-local-callback refresh-now!))
@@ -111,13 +118,17 @@
     (apply transition *model* arguments)))
 
 (define (render-current! geometry frame)
-  (if
-    *focus-next-frame?*
-    (let ([snapshot (observe *model* #t)])
+  (cond
+    [*focus-next-frame?*
+      (define snapshot (observe *model* #t))
       (set! *focus-next-frame?* #f)
+      (set! *reveal-next-frame?* #f)
       (commit!
-        (model.focus-frame-observed *model* snapshot geometry)))
-    (commit! (model.geometry-observed *model* geometry)))
+        (model.focus-frame-observed *model* snapshot geometry))]
+    [*reveal-next-frame?*
+      (set! *reveal-next-frame?* #f)
+      (commit! (model.reveal-frame-observed *model* geometry))]
+    [else (commit! (model.geometry-observed *model* geometry))])
   (define model-at-render *model*)
   (define current-layout (model.presented-layout model-at-render))
   (if current-layout
@@ -189,8 +200,9 @@
       (entry-palette-for ls-colors)))
   (component.install! side render-current! handle-event!)
   (hooks.install! dispatch!)
+  (set! *reveal-next-frame?* #t)
   (subscribe-to-refresh!)
-  (refresh-now!))
+  (reveal-now!))
 
 (define (start! side width icons? guides? visibility theme-sources ls-colors)
   (when *started?*
