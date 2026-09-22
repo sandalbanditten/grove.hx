@@ -3,7 +3,7 @@
 (require (prefix-in helix. "helix/commands.scm"))
 (require (prefix-in helix-static. "helix/static.scm"))
 
-(provide workspace-root active-path unsaved-paths open-file!)
+(provide workspace-root active-path open-paths unsaved-paths open-file!)
 
 (define (workspace-root)
   (helix-static.get-helix-cwd))
@@ -16,6 +16,16 @@
 (define (active-path)
   (define document-id (focused-document-id))
   (and document-id (editor-document->path document-id)))
+
+(define (open-paths)
+  (let loop ([remaining (editor-all-documents)] [result '()])
+    (if
+      (null? remaining)
+      result
+      (let ([path (editor-document->path (car remaining))])
+        (loop
+          (cdr remaining)
+          (if (string? path) (cons path result) result))))))
 
 (define (unsaved-paths)
   (let loop ([remaining (editor-all-documents)] [result '()])

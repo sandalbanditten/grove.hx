@@ -75,22 +75,17 @@
     (> (string-length value) 0)
     (char=? (string-ref value 0) #\/)))
 
-(define (plan-file-tree-scan model observed-root active-id focus?)
-  (unless
-    (and
-      (valid-root? observed-root)
-      (or (not active-id) (string? active-id))
-      (boolean? focus?))
+; Revealed ids are the rows a scan must reach through, whatever is collapsed:
+; the Active file when Grove takes focus, every open document at startup.
+(define (plan-file-tree-scan model observed-root revealed-ids)
+  (unless (and (valid-root? observed-root) (list? revealed-ids))
     (error "invalid File tree scan plan"))
   (define base-expansion
     (if
       (equal? observed-root (model-value-root model))
       (model-value-expansion model)
       (expansion.empty)))
-  (if
-    (and focus? active-id)
-    (expansion.expand-ancestors base-expansion active-id)
-    base-expansion))
+  (expansion.expand-every-ancestor base-expansion revealed-ids))
 
 (define (copy-model model
          #:root
@@ -277,17 +272,19 @@
       path.root-id
       (reconciled-anchor model base-entries))))
 
-(define (activatable-active-id model)
-  (define active-id (model-value-active-id model))
+(define (activatable-id model id)
   (define entry
     (and
-      active-id
+      id
       (model-value-tree model)
-      (tree.find (model-value-tree model) active-id)))
+      (tree.find (model-value-tree model) id)))
   (and
     entry
     (tree.file-kind? (tree.entry-kind entry))
-    active-id))
+    id))
+
+(define (activatable-active-id model)
+  (activatable-id model (model-value-active-id model)))
 
 (define (focus-model model)
   (define active-id (activatable-active-id model))
@@ -566,22 +563,30 @@
         geometry-value))
     #f))
 
-; Grove's first observation opens the Workspace on the Active file. Expanding
+; Grove's first observation opens the Workspace on every file Helix already
+; holds, so a glob that opened many files leaves each one reachable. Expanding
 ; needs only the File tree, so it happens here; anchoring needs Host geometry,
 ; so it waits for the first frame. Neither step takes Cursor.
-(define (expanded-to-active model)
-  (define active-id (activatable-active-id model))
+(define (expanded-to-open model open-ids)
+  (define targets
+    (filter (lambda (id) (activatable-id model id)) open-ids))
   (if
-    (not active-id)
+    (null? targets)
     model
     (copy-model
       model
       #:expansion
-      (expansion.expand-ancestors (model-value-expansion model) active-id))))
+      (expansion.expand-every-ancestor
+        (model-value-expansion model)
+        targets))))
 
-(define (first-observation-received model snapshot)
+(define (first-observation-received model snapshot open-ids)
+  (unless (list? open-ids)
+    (error "invalid open document list"))
   (update-result
-    (expanded-to-active (install-observation-snapshot model snapshot))
+    (expanded-to-open
+      (install-observation-snapshot model snapshot)
+      open-ids)
     #f))
 
 (define (revealed-model model)

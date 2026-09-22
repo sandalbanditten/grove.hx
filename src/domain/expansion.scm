@@ -4,6 +4,7 @@
 (provide empty contains?
   expand
   expand-ancestors
+  expand-every-ancestor
   collapse-subtree
   prune
   visible)
@@ -32,6 +33,13 @@
       (null? ids)
       result
       (loop (cdr ids) (expand result (car ids))))))
+
+(define (expand-every-ancestor expansion entry-ids)
+  (let loop ([remaining entry-ids] [result expansion])
+    (if
+      (null? remaining)
+      result
+      (loop (cdr remaining) (expand-ancestors result (car remaining))))))
 
 (define (at-or-below? directory-id candidate-id)
   (or

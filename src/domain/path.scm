@@ -1,4 +1,5 @@
 (provide root-id root-id? child-id parent-id ancestor-ids depth id-inside?
+  ids-for-paths
   basename
   path-for-id
   id-for-path)
@@ -59,3 +60,8 @@
         (string-length prefix)
         (string-length absolute-path))]
     [else #f]))
+
+(define (ids-for-paths root paths)
+  (filter
+    string?
+    (map (lambda (value) (id-for-path root value)) paths)))

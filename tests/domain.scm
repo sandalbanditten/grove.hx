@@ -238,11 +238,10 @@
     (layout.geometry 0 0 16 5)))
 
 (check
-  "an unavailable Pane does not expand Active file ancestors"
+  "an unavailable Pane leaves Active file ancestors collapsed"
   (not
     (expansion.contains?
-      (model.plan-file-tree-scan
-        unavailable-focused-model ROOT nested-target #f)
+      (model.plan-file-tree-scan unavailable-focused-model ROOT '())
       "outer")))
 
 (define focused-layout (model.presented-layout focused-model))

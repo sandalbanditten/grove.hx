@@ -28,7 +28,7 @@
 
 (struct rendered-frame (root layout))
 
-(define (observe model-at-observation focus?)
+(define (observe model-at-observation revealed-paths)
   (define observed-root (host.workspace-root))
   (define active-path (host.active-path))
   (define active-id
@@ -37,8 +37,7 @@
     (model.plan-file-tree-scan
       model-at-observation
       observed-root
-      active-id
-      focus?))
+      (path.ids-for-paths observed-root revealed-paths)))
   (model.observation-snapshot
     observed-root
     (scanner.scan observed-root scan-scope)
@@ -46,14 +45,21 @@
     active-id))
 
 (define (refresh-now!)
-  (define snapshot (observe *model* #f))
+  (define snapshot (observe *model* '()))
   (dispatch! model.observation-received snapshot))
 
 ; Startup scans through the Active file's ancestors so the first tree already
 ; holds the path Helix is showing.
 (define (reveal-now!)
-  (define snapshot (observe *model* #t))
-  (dispatch! model.first-observation-received snapshot))
+  (define open-paths (host.open-paths))
+  (define snapshot (observe *model* open-paths))
+  ; The Model has no Workspace root until the snapshot lands, so these ids are
+  ; resolved against the Host's. A root that moved between the two reads only
+  ; yields ids the File tree does not hold, which expand nothing.
+  (dispatch!
+    model.first-observation-received
+    snapshot
+    (path.ids-for-paths (host.workspace-root) open-paths)))
 
 (define (schedule-refresh!)
   (enqueue-thread-local-callback refresh-now!))
@@ -121,7 +127,7 @@
 (define (render-current! geometry frame)
   (cond
     [*focus-next-frame?*
-      (define snapshot (observe *model* #t))
+      (define snapshot (observe *model* (list (host.active-path))))
       (set! *focus-next-frame?* #f)
       (set! *reveal-next-frame?* #f)
       (commit!

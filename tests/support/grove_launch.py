@@ -36,6 +36,7 @@ def start_grove(
     theme: str | None = None,
     init: str = "",
     environment: Mapping[str, str | None] | None = None,
+    extra_documents: tuple[Path, ...] = (),
 ) -> GroveDriver:
     helix = start_grove_helix(
         sandbox,
@@ -47,6 +48,7 @@ def start_grove(
         theme=theme,
         init=init,
         environment=environment,
+        extra_documents=extra_documents,
     )
     try:
         grove = GroveDriver(helix, workspace)
@@ -74,6 +76,7 @@ def start_grove_helix(
     theme: str | None = None,
     init: str = "",
     environment: Mapping[str, str | None] | None = None,
+    extra_documents: tuple[Path, ...] = (),
 ) -> HelixDriver:
     arguments = " ".join(
         f"#:{name} {_SETTING_VALUES.get(value, value)}"
@@ -84,7 +87,9 @@ def start_grove_helix(
     return sandbox.start(
         server,
         cwd=workspace.root,
-        documents=(active_file,) if active_file is not None else (),
+        documents=(
+            ((active_file,) if active_file is not None else ()) + extra_documents
+        ),
         init=_grove_init(repository, startup, init),
         theme=theme or TEST_THEME,
         environment=environment,

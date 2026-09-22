@@ -40,6 +40,19 @@ def helix_environment() -> dict[str, str]:
     return {}
 
 
+@pytest.fixture
+def extra_documents() -> tuple[Path, ...]:
+    return ()
+
+
+@given("Helix also opens", target_fixture="extra_documents")
+def helix_also_opens(
+    workspace: WorkspaceFixture,
+    datatable: list[list[str]],
+) -> tuple[Path, ...]:
+    return tuple(workspace.document_path(row[0]) for row in datatable[1:])
+
+
 @given(
     parsers.re(
         r'^the environment sets (?P<name>LS_COLORS|EZA_COLORS) to "(?P<spec>.*)"$'
@@ -132,6 +145,7 @@ def start_helix(
     grove_init: str,
     helix_theme: str,
     helix_environment: dict[str, str],
+    extra_documents: tuple[Path, ...],
 ) -> GroveDriver:
     return _launch(
         resources,
@@ -143,6 +157,7 @@ def start_helix(
         theme=helix_theme,
         init=grove_init,
         environment=helix_environment,
+        extra_documents=extra_documents,
     )
 
 
@@ -266,6 +281,7 @@ def _launch(
     theme: str = TEST_THEME,
     init: str = "",
     environment: dict[str, str] | None = None,
+    extra_documents: tuple[Path, ...] = (),
 ) -> GroveDriver:
     grove = start_grove(
         helix_sandbox,
@@ -277,6 +293,7 @@ def _launch(
         theme=theme,
         init=init,
         environment=environment,
+        extra_documents=extra_documents,
     )
     resources.callback(grove.close)
     return grove

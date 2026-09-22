@@ -76,6 +76,23 @@ Feature: Start Grove
     When the editor receives "i" while Grove is unfocused
     Then the active Editor view is in Insert mode
 
+  Scenario: Open the Workspace on every file Helix already holds
+    Given a Workspace containing entries
+      | kind | path                   |
+      | file | anchor.txt             |
+      | file | outer/inner/first.scm  |
+      | file | other/deep/second.scm  |
+      | file | untouched/third.scm    |
+    And "outer/inner/first.scm" is Active
+    And Helix also opens
+      | path                  |
+      | other/deep/second.scm |
+    When Helix starts with Grove in that Workspace
+    Then the File tree shows "outer/inner/first.scm"
+    And the File tree shows "other/deep/second.scm"
+    And the File tree does not show "untouched/third.scm"
+    And "outer/inner/first.scm" has no Cursor mark
+
   Scenario: Open a tall Workspace scrolled to the Active file
     Given a Workspace containing entries
       | kind | path                        | count |
