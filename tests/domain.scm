@@ -190,7 +190,7 @@
         (loop (+ height 1))))))
 
 (define initial-model
-  (model.init 'left 16 #t #t 'always #f #t))
+  (model.init 'left 16 #t #t 'always #f #t #t))
 
 (define (updated model-value transition . arguments)
   (model.update-result-model

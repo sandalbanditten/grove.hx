@@ -29,6 +29,7 @@ Feature: Start Grove
       | guides     | non-boolean | Grove guides must be a boolean |
       | visibility | middle      | invalid Grove visibility       |
       | sort       | middle      | invalid Grove sort             |
+      | aggregate  | non-boolean | Grove aggregate must be a boolean |
 
   Scenario: Reject a second start
     Given Grove starts twice
@@ -64,9 +65,10 @@ Feature: Start Grove
 
   Scenario: Open the Workspace on the Active file
     Given a Workspace containing entries
-      | kind | path                   |
-      | file | anchor.txt             |
-      | file | outer/inner/active.txt |
+      | kind      | path                   |
+      | file      | anchor.txt             |
+      | directory | outer/aaa              |
+      | file      | outer/inner/active.txt |
     And "outer/inner/active.txt" is Active
     When Helix starts with Grove in that Workspace
     Then the File tree shows "outer/inner/active.txt"

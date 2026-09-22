@@ -8,6 +8,9 @@ Feature: Keep hierarchy visible while the File tree scrolls
       | directory | omega                         |       |
       | file      | tail-{:02d}.txt               | 8     |
     And "alpha/beta/gamma/g-00.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And Grove is focused
     And the terminal height becomes 6 rows
@@ -22,6 +25,9 @@ Feature: Keep hierarchy visible while the File tree scrolls
       | kind | path                   |
       | file | outer/inner/active.txt |
     And "outer/inner/active.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 2 rows
     And Grove is focused
@@ -49,6 +55,9 @@ Feature: Keep hierarchy visible while the File tree scrolls
       | file | alpha/beta/gamma/item-{:02d}.txt | 13    |
       | file | tail-{:02d}.txt                  | 6     |
     And "alpha/beta/gamma/item-00.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 6 rows
     And Grove is focused
@@ -70,6 +79,9 @@ Feature: Keep hierarchy visible while the File tree scrolls
       | file | alpha/beta/gamma/item-{:02d}.txt | 13    |
       | file | tail-{:02d}.txt                  | 6     |
     And "alpha/beta/gamma/item-03.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 6 rows
     And Grove is focused
@@ -86,6 +98,9 @@ Feature: Keep hierarchy visible while the File tree scrolls
       | file | alpha/beta/gamma/item-{:02d}.txt | 13    |
       | file | tail-{:02d}.txt                  | 6     |
     And "alpha/beta/gamma/item-00.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 6 rows
     And Grove is focused
@@ -106,6 +121,9 @@ Feature: Keep hierarchy visible while the File tree scrolls
       | file | alpha/beta/gamma/item-{:02d}.txt | 13    |
       | file | tail-{:02d}.txt                  | 6     |
     And "alpha/beta/gamma/item-00.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 6 rows
     And Grove is focused

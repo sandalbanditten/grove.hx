@@ -107,6 +107,7 @@ def label_omits_modifier(grove: GroveDriver, name: str, modifier: str) -> None:
 def configured_grove_theme(
     datatable: list[list[str]],
     grove_theme_sources: dict[str, dict[str, str]],
+    grove_settings: dict[str, str],
 ) -> dict[str, str]:
     header, *rows = datatable
     grove_theme_sources.update(
@@ -116,7 +117,7 @@ def configured_grove_theme(
         f"#:{role} {_theme_source(record)}"
         for role, record in grove_theme_sources.items()
     )
-    return {"theme": f"(grove-theme {fields})"}
+    return {**grove_settings, "theme": f"(grove-theme {fields})"}
 
 
 def _theme_source(record: dict[str, str]) -> str:

@@ -5,6 +5,9 @@ Feature: Present File tree status layers
       | kind | path                   |
       | file | outer/inner/active.txt |
     And "outer/inner/active.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And Grove is focused
     And the editor inserts "changed-" without saving and returns to Normal mode
@@ -103,6 +106,9 @@ Feature: Present File tree status layers
       | path                            | status   |
       | alpha/beta/gamma/item-00.txt    | modified |
     And "alpha/beta/gamma/item-00.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the editor inserts "dirty-" without saving and returns to Normal mode
     And the terminal height becomes 6 rows
@@ -122,6 +128,9 @@ Feature: Present File tree status layers
       | path  | status  |
       | alpha | ignored |
     And "alpha/beta/gamma/item-00.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 6 rows
     And Grove is focused

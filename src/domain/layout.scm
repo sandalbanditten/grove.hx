@@ -113,16 +113,12 @@
           (cdr ids)
           (if entry (cons entry result) result))))))
 
-(define (ancestor-stack-size entry host-height)
-  (define depth (path.depth (tree.entry-id entry)))
-  (if (< depth host-height) depth 0))
-
+; An aggregated run shows one row, so the stack counts the ancestors a row
+; actually has rather than the depth of its path.
 (define (pinned-entries-at visible-entries index host-height)
   (define entry (try-list-ref visible-entries index))
-  (if
-    (> (ancestor-stack-size entry host-height) 0)
-    (ancestor-entries visible-entries entry)
-    '()))
+  (define ancestors (ancestor-entries visible-entries entry))
+  (if (< (length ancestors) host-height) ancestors '()))
 
 (define (capacity-at visible-entries index host-height)
   (- host-height
@@ -134,7 +130,8 @@
   (let loop ([candidate initial]
              [remaining-entries (list-drop visible-entries initial)])
     (define pinned
-      (ancestor-stack-size (car remaining-entries) host-height))
+      (length
+        (pinned-entries-at visible-entries candidate host-height)))
     (if
       (<= (+ pinned (- total candidate)) host-height)
       candidate

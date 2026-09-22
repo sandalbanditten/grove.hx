@@ -1,5 +1,6 @@
 (provide root-id root-id? child-id parent-id ancestor-ids depth id-inside?
   ids-for-paths
+  relative-id
   basename
   path-for-id
   id-for-path)
@@ -65,3 +66,9 @@
   (filter
     string?
     (map (lambda (value) (id-for-path root value)) paths)))
+
+(define (relative-id parent id)
+  (if
+    (root-id? parent)
+    id
+    (substring id (+ (string-length parent) 1) (string-length id))))

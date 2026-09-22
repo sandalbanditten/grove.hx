@@ -91,7 +91,8 @@
          visibility
          theme
          ls-colors
-         sort)
+         sort
+         aggregate?)
   (unless (or (equal? side 'left) (equal? side 'right))
     (error "invalid Grove side"))
   (unless (valid-width? width)
@@ -109,7 +110,9 @@
   (unless (valid-ls-colors? ls-colors)
     (error "invalid Grove LS_COLORS"))
   (unless (valid-sort? sort)
-    (error "invalid Grove sort")))
+    (error "invalid Grove sort"))
+  (unless (boolean? aggregate?)
+    (error "Grove aggregate must be a boolean")))
 
 (define (grove-start! #:icons [icons? #t]
          #:guides
@@ -125,7 +128,9 @@
          #:ls-colors
          [ls-colors #f]
          #:sort
-         [sort 'directories-first])
+         [sort 'directories-first]
+         #:aggregate
+         [aggregate? #t])
   (validate-settings
     side
     width
@@ -134,7 +139,8 @@
     visibility
     theme
     ls-colors
-    sort)
+    sort
+    aggregate?)
   (helix.start!
     side
     (start-width width)
@@ -144,7 +150,8 @@
     (grove-theme-value-sources theme)
     ls-colors
     (fit-width? width)
-    (equal? sort 'directories-first)))
+    (equal? sort 'directories-first)
+    aggregate?))
 
 ;;@doc
 ;;Focus Grove.

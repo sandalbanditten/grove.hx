@@ -76,8 +76,12 @@ def reload_hotkey(key: str) -> str:
 
 
 @given("Grove settings", target_fixture="grove_settings")
-def configured_grove(datatable: list[list[str]]) -> dict[str, str]:
-    return dict(datatable[1:])
+def configured_grove(
+    datatable: list[list[str]],
+    grove_settings: dict[str, str],
+) -> dict[str, str]:
+    # Settings steps compose: a scenario may state a theme and a setting.
+    return {**grove_settings, **dict(datatable[1:])}
 
 
 @given("Grove starts twice", target_fixture="grove_start_count")

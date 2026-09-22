@@ -20,10 +20,16 @@
 (struct facts
   (root git-status unsaved-ids active-id cursor expansion palette guides))
 
+; An aggregated run reads as the path it stands for. Every other row keeps its
+; own name, which is the same path once a run is one directory long.
 (define (label current-facts entry)
   (define id (tree.entry-id entry))
-  (path.basename
-    (if (path.root-id? id) (facts-root current-facts) id)))
+  (if
+    (path.root-id? id)
+    (path.basename (facts-root current-facts))
+    (path.relative-id
+      (guides.presented-parent (facts-guides current-facts) id)
+      id)))
 
 (define (lanes current-facts entry)
   (guides.lanes (facts-guides current-facts) (tree.entry-id entry)))
@@ -38,20 +44,22 @@
     [else 3]))
 
 ; ADR 0012 keeps arithmetic within the arity Steel's JIT compiles.
-(define (fixed-width id root? icons?)
+(define (fixed-width root? lane-count icons?)
   (+
     ; Git mark, Cursor mark, Branch, and Unsaved mark
     (if root? 3 6)
     ; Ancestor lanes
-    (* 4 (max 0 (- (path.depth id) 1)))
+    (* 4 lane-count)
     (icon-area-width root? icons?)))
 
 ; Grove builds every row from the same fixed parts, so the columns one row
 ; needs in full are their total. Keep this in step with the Pane renderer.
 (define (natural-width current-facts entry icons?)
-  (define id (tree.entry-id entry))
   (+
-    (fixed-width id (path.root-id? id) icons?)
+    (fixed-width
+      (path.root-id? (tree.entry-id entry))
+      (length (lanes current-facts entry))
+      icons?)
     (string-length (label current-facts entry))))
 
 ; An Entry palette resolves a name by what kind of thing it is. Grove's kinds

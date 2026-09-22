@@ -47,6 +47,7 @@ Feature: Present File tree rows
       | kind      | path                   |
       | file      | anchor.txt             |
       | directory | outer                  |
+      | directory | outer/aaa              |
       | directory | outer/inner            |
       | file      | outer/inner/inside.txt |
     And "anchor.txt" is Active

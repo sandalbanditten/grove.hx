@@ -83,6 +83,9 @@ Feature: Manage Workspace files
       | file      | old/background.txt |
       | directory | archive            |
     And "anchor.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And Helix opens "old/background.txt"
     And Helix opens "anchor.txt"

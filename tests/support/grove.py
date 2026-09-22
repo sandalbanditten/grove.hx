@@ -446,6 +446,7 @@ def _visible_rows(
     workspace: WorkspaceFixture,
 ) -> tuple[VisibleRow, ...]:
     labels = {_display_label(path.name) for path in workspace.paths}
+    labels |= _run_labels(workspace)
     rows: list[VisibleRow] = []
     parents: list[tuple[int, PurePath]] = []
     for number, raw in enumerate(lines, start=1):
@@ -457,17 +458,24 @@ def _visible_rows(
         while parents and parents[-1][0] >= column:
             parents.pop()
         parent = parents[-1][1] if parents else PurePath()
-        candidates = [
-            path
-            for path in workspace.paths
-            if path.parent
-            in {parent, PurePath(".") if parent == PurePath() else parent}
-            and _display_label(path.name) == label
-        ]
-        if not candidates and not rows:
+        if "/" in label:
+            # An aggregated run names every directory it stands for.
+            run = parent.joinpath(*PurePath(label).parts)
+            candidates = [path for path in workspace.paths if path == run]
+        else:
             candidates = [
-                path for path in workspace.paths if _display_label(path.name) == label
+                path
+                for path in workspace.paths
+                if path.parent
+                in {parent, PurePath(".") if parent == PurePath() else parent}
+                and _display_label(path.name) == label
             ]
+            if not candidates and not rows:
+                candidates = [
+                    path
+                    for path in workspace.paths
+                    if _display_label(path.name) == label
+                ]
         if len(candidates) != 1:
             raise AssertionError(
                 f"Grove row has ambiguous filesystem identity: {text!r}"
@@ -477,6 +485,16 @@ def _visible_rows(
         if path in workspace.directories:
             parents.append((column, path))
     return tuple(rows)
+
+
+def _run_labels(workspace: WorkspaceFixture) -> set[str]:
+    # A run can begin at any depth, so every multi-segment tail is a candidate.
+    labels = set()
+    for path in workspace.directories:
+        parts = path.parts
+        for start in range(len(parts) - 1):
+            labels.add(_display_label("/".join(parts[start:])))
+    return labels
 
 
 def _styled_slice(line: str, rail: int, grove_before: bool) -> Text:

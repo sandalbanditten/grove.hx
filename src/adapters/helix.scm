@@ -207,7 +207,8 @@
          visibility
          ls-colors
          fit?
-         directories-first?)
+         directories-first?
+         aggregate?)
   (set! *model*
     (model.init
       side
@@ -216,7 +217,8 @@
       guides?
       visibility
       (entry-palette-for ls-colors)
-      directories-first?))
+      directories-first?
+      aggregate?))
   (component.install! side render-current! handle-event!)
   (hooks.install! dispatch!)
   (set! *fit-width?* fit?)
@@ -232,7 +234,8 @@
          theme-sources
          ls-colors
          fit-width?
-         directories-first?)
+         directories-first?
+         aggregate?)
   (when *started?*
     (error "Grove has already started"))
   (set! *started?* #t)
@@ -247,7 +250,8 @@
         visibility
         ls-colors
         fit-width?
-        directories-first?)))
+        directories-first?
+        aggregate?)))
   #t)
 
 (define (enqueue-after-start! action)

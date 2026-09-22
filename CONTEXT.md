@@ -120,12 +120,15 @@ _Avoid_: LS_COLORS theme, file colors
 
 **File tree**:
 One immutable ordered filesystem hierarchy containing the entries currently
-known to Grove from the latest Observation snapshot. Entries within a directory
+known to Grove from the latest Observation snapshot. It reaches one directory
+past every collapsed directory that holds a single directory, so an Aggregated
+run is known before it is expanded. Entries within a directory
 are ordered naturally by name; `directories-first` groups directories ahead of
 files first, while `alphabetical` interleaves them the way `eza` lists them. Its
 Workspace root is a separate identity. Collapse does not edit this hierarchy.
-Expansion controls which known descendants become Visible rows; a later observation may replace
-the hierarchy with a scan that did not traverse a collapsed directory.
+Expansion controls which known descendants become Visible rows; a later
+observation may replace the hierarchy with a scan that did not traverse a
+collapsed directory.
 _Avoid_: Tree state, session
 
 **Unreadable directory**:
@@ -210,6 +213,15 @@ later siblings follow, `└─` for the last of them. Its final column carries t
 expansion control on an expandable row, the Active file mark on the Active
 file, and a plain stem otherwise.
 _Avoid_: Leaf mark, connector, tree stem
+
+**Aggregated run**:
+A directory whose only child is another directory, continued while that holds.
+Grove presents the whole run as one Visible row under the identity of its
+deepest directory, labelled by the path it stands for: `src/main/java/app`.
+Expanding that row expands every directory in the run, a new entry lands in the
+deepest one, and the run counts as one step of ancestry. The Workspace root
+never joins a run.
+_Avoid_: Compact folder, collapsed path, folder chain
 
 **Visible row**:
 One semantic filesystem entry in the current File tree. Its stable identity

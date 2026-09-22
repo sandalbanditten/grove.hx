@@ -100,6 +100,9 @@ Feature: Navigate and resize with the Rail
         | directory | omega                         |       |
         | file      | tail-{:02d}.txt                | 10    |
       And "alpha/beta/sibling/inside.txt" is Active
+      And Grove settings
+        | setting   | value    |
+        | aggregate | disabled |
       When Helix starts with Grove in that Workspace
       And Grove is focused
       And the terminal height becomes 6 rows

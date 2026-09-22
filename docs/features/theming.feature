@@ -171,6 +171,9 @@ Feature: Theme Grove
       | pane-background     | Style            |            | #ddeeff    |
       | visible-row         | Style            | #112233    | #ddeeff    |
       | pinned-ancestor-row | grove.test.empty |            |            |
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 6 rows
     And Grove is focused

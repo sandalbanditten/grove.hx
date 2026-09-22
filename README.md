@@ -79,6 +79,7 @@ file picker before Steel components mount.
 | `#:side` | `'left` | `'left` or `'right` | Places Grove on that side of the editor. |
 | `#:theme` | `(grove-theme)` | A `grove-theme` value | Follows the active Helix theme by default. See [THEMING.md](THEMING.md) for role and color overrides. |
 | `#:width` | `32` | `16` through `64`, or `'fit` | Sets the total width, including the Rail that separates Grove from the editor and acts as its scrollbar. `'fit` starts as wide as the widest entry needs, the way `=` resizes later. |
+| `#:aggregate` | `#t` | `#t` or `#f` | Shows a run of single-child directories as one row, `src/main/java/app`, instead of one row each. |
 | `#:sort` | `'directories-first` | `'directories-first` or `'alphabetical` | Groups directories ahead of files, or interleaves them by name the way `eza` lists them. |
 | `#:visibility` | `'always` | `'always` or `'focused` | Keeps the Pane visible, or shows it only while Grove is focused. |
 

@@ -4,6 +4,7 @@
 (require (prefix-in tree. "tree.scm"))
 (require (prefix-in row. "row.scm"))
 (require (prefix-in guides. "guides.scm"))
+(require (prefix-in aggregate. "aggregate.scm"))
 
 (provide init
   root
@@ -13,6 +14,7 @@
   icons?
   guides?
   directories-first?
+  aggregate?
   focused?
   plan-file-tree-scan
   observation-snapshot
@@ -53,7 +55,8 @@
     guides?
     visibility
     palette
-    directories-first?))
+    directories-first?
+    aggregate?))
 
 (struct observation-snapshot (root tree git-status active-id))
 
@@ -67,6 +70,7 @@
 (define icons? model-value-icons?)
 (define guides? model-value-guides?)
 (define directories-first? model-value-directories-first?)
+(define aggregate? model-value-aggregate?)
 (define (focused? model)
   (and (model-value-cursor model) #t))
 
@@ -130,7 +134,8 @@
     (model-value-guides? model)
     visibility-value
     (model-value-palette model)
-    (model-value-directories-first? model)))
+    (model-value-directories-first? model)
+    (model-value-aggregate? model)))
 
 (define (without-focus model)
   (copy-model model #:cursor #f))
@@ -138,9 +143,12 @@
 (define (visible-entries model)
   (if
     (and (model-value-root model) (model-value-tree model))
-    (expansion.visible
-      (model-value-expansion model)
-      (model-value-tree model))
+    (aggregate.presented
+      (model-value-tree model)
+      (expansion.visible
+        (model-value-expansion model)
+        (model-value-tree model))
+      (model-value-aggregate? model))
     '()))
 
 (define (row-facts model)
@@ -184,7 +192,8 @@
          guides-value
          visibility-value
          palette-value
-         directories-first-value)
+         directories-first-value
+         aggregate-value)
   (model-value
     #f
     #f
@@ -201,7 +210,8 @@
     guides-value
     visibility-value
     palette-value
-    directories-first-value))
+    directories-first-value
+    aggregate-value))
 
 (define (first-surviving-id entries new-ids)
   (define found
@@ -452,6 +462,8 @@
       (id-after-collapse (model-value-anchor model)))
     #f))
 
+; A row that stands for an aggregated run expands the whole run: its
+; descendants only become Visible once every directory above them is expanded.
 (define (expand-directory model entry)
   (define directory-id (tree.entry-id entry))
   (if
@@ -464,7 +476,9 @@
         model
         #:expansion
         (expansion.expand
-          (model-value-expansion model)
+          (expansion.expand-ancestors
+            (model-value-expansion model)
+            directory-id)
           directory-id)))))
 
 (define (toggle-directory model entry)

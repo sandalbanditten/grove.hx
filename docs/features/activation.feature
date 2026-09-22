@@ -21,6 +21,9 @@ Feature: Activate files
       | kind | path                            | count |
       | file | outer/inner/item-{:02d}.txt     | 20    |
     And "outer/inner/item-05.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 8 rows
     And the Wheel scrolls down over Grove
@@ -59,6 +62,9 @@ Feature: Activate files
       | file | outer/inner/item-{:02d}.txt | 15    |
       | file | tail-{:02d}.txt             | 30    |
     And "outer/inner/item-00.txt" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
     When Helix starts with Grove in that Workspace
     And the terminal height becomes 8 rows
     And Grove is focused

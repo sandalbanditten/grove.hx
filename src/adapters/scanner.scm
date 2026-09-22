@@ -38,22 +38,48 @@
       (define expanded?
         (expansion.contains? expansion-value id))
       (define descendants
-        (and
+        (if
           expanded?
           (scan-directory
             (read-dir-entry-path entry)
             id
-            expansion-value)))
+            expansion-value)
+          (scan-run (read-dir-entry-path entry) id)))
       (define kind
         (if
           (and expanded? (not descendants))
           'unreadable-directory
           'directory))
+      ; A collapsed directory reports no contents, so `scan-run` never turns a
+      ; miss into a failure the way an expanded scan does.
       (cons
         (tree.entry id kind)
         (if descendants descendants '()))]
     [else
       '()]))
+
+; Grove aggregates a run of single-child directories into one row, which it
+; can only do while holding the run itself. A collapsed directory therefore
+; reports the run below it and nothing else: one listing per step, taken only
+; while a directory holds exactly one scannable entry.
+(define (sole-directory entries)
+  (and
+    (pair? entries)
+    (null? (cdr entries))
+    (not (read-dir-entry-is-symlink? (car entries)))
+    (read-dir-entry-is-dir? (car entries))
+    (not (string=? (read-dir-entry-file-name (car entries)) ".git"))
+    (car entries)))
+
+(define (scan-run path parent-id)
+  (define only (sole-directory (or (directory-entries path) '())))
+  (if
+    (not only)
+    '()
+    (let ([id (path.child-id parent-id (read-dir-entry-file-name only))])
+      (cons
+        (tree.entry id 'directory)
+        (scan-run (read-dir-entry-path only) id)))))
 
 (define (scan-directory path parent-id expansion-value)
   (define entries (directory-entries path))

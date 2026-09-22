@@ -11,8 +11,9 @@ Feature: Keep the File tree current
 
   Scenario: Forget expanded descendants when their parent closes
     Given a Workspace containing entries
-      | path                   |
-      | outer/inner/before.txt |
+      | kind      | path                   |
+      | directory | outer/aaa              |
+      | file      | outer/inner/before.txt |
     When Helix starts with Grove in that Workspace
     And the "outer" directory is expanded
     And the "outer/inner" directory is expanded
@@ -69,6 +70,56 @@ Feature: Keep the File tree current
     And "file-link" has a plain Branch tip
     And "directory-link" has a plain Branch tip
     And "broken-link" has a plain Branch tip
+
+  Scenario: Aggregate a run of single-child directories into one row
+    Given a Workspace containing entries
+      | kind | path                      |
+      | file | src/main/java/app/Foo.java |
+      | file | docs/guide.md             |
+      | file | README.md                 |
+    And "README.md" is Active
+    When Helix starts with Grove in that Workspace
+    Then the File tree shows "src/main/java/app"
+    And the File tree does not show "src/main"
+    And "src/main/java/app" uses 0 Ancestor lanes
+    And "src/main/java/app" can expand
+    When the "src/main/java/app" directory is expanded
+    Then the File tree shows "src/main/java/app/Foo.java"
+    And the File tree already does not show "src/main"
+    And "src/main/java/app/Foo.java" uses 1 Ancestor lane
+    When the "src/main/java/app" directory is collapsed
+    Then the File tree does not show "src/main/java/app/Foo.java"
+    And the File tree shows "src/main/java/app"
+
+  Scenario: Keep every directory on its own row without aggregation
+    Given a Workspace containing entries
+      | kind | path                      |
+      | file | src/main/java/app/Foo.java |
+      | file | README.md                 |
+    And "README.md" is Active
+    And Grove settings
+      | setting   | value    |
+      | aggregate | disabled |
+    When Helix starts with Grove in that Workspace
+    Then the File tree shows "src"
+    And the File tree does not show "src/main"
+    When the "src" directory is expanded
+    Then the File tree shows "src/main"
+    And "src/main" uses 1 Ancestor lane
+
+  Scenario: Keep a directory with more than one child on its own row
+    Given a Workspace containing entries
+      | kind      | path             |
+      | file      | src/only/one.txt |
+      | directory | src/second       |
+      | file      | README.md        |
+    And "README.md" is Active
+    When Helix starts with Grove in that Workspace
+    Then the File tree shows "src"
+    And the File tree does not show "src/only"
+    When the "src" directory is expanded
+    Then the File tree shows "src/only"
+    And the File tree shows "src/second"
 
   Scenario: Group directories ahead of files
     Given a Workspace containing entries

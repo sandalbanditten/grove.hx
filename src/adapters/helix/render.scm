@@ -158,9 +158,11 @@
   (cond
     [error-icon error-icon]
     [(path.root-id? (tree.entry-id entry)) "󰙅"]
+    ; An aggregated run is labelled by its whole path but is still one
+    ; directory, so its icon comes from the name that identifies it.
     [(tree.directory-kind? kind)
       (icons.glyph-for
-        (row.label current-facts entry)
+        (path.basename (tree.entry-id entry))
         'directory
         (row.expanded? current-facts entry))]
     [else
