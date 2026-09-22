@@ -58,6 +58,10 @@
     (foreground 'visible-row '("ui.text") Color/Reset))
   (define visible-background
     (background 'visible-row '("ui.text") pane-background))
+  ; A Git mark is a gutter mark, so it reads Helix's own gutter keys first.
+  (define minus-scopes '("diff.minus.gutter" "diff.minus"))
+  (define delta-scopes '("diff.delta.gutter" "diff.delta"))
+  (define plus-scopes '("diff.plus.gutter" "diff.plus"))
   (define (row role default-scopes)
     (cons
       (background role default-scopes visible-background)
@@ -92,9 +96,9 @@
       '("error")
       Color/LightRed)
     'conflict (foreground 'git-conflict-foreground '("error") Color/Magenta)
-    'deleted (foreground 'git-deleted-foreground '("diff.minus") Color/Red)
-    'modified (foreground 'git-modified-foreground '("diff.delta") Color/Yellow)
-    'created (foreground 'git-created-foreground '("diff.plus") Color/Green)
+    'deleted (foreground 'git-deleted-foreground minus-scopes Color/Red)
+    'modified (foreground 'git-modified-foreground delta-scopes Color/Yellow)
+    'created (foreground 'git-created-foreground plus-scopes Color/Green)
     'unsaved-mark-foreground
     (foreground 'unsaved-mark-foreground '("info") Color/Cyan)
     'icon-palette

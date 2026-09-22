@@ -64,10 +64,10 @@ distinction.
 | `active-file-mark-foreground` | Active file marks | foreground | `info` | matching row foreground |
 | `rail` | Rail thumb and track | foreground for thumb, background for track | `ui.menu.scroll` | matching terminal default |
 | `filesystem-error-foreground` | Unreadable directory and Broken link icons and labels | foreground | `error` | terminal bright red |
-| `git-conflict-foreground` | labels with a conflicting Git status | foreground | `error` | terminal magenta |
-| `git-deleted-foreground` | labels with a deleted Git status | foreground | `diff.minus` | terminal red |
-| `git-modified-foreground` | labels with a modified Git status | foreground | `diff.delta` | terminal yellow |
-| `git-created-foreground` | labels with a created Git status | foreground | `diff.plus` | terminal green |
+| `git-conflict-foreground` | Git marks for a conflicting status | foreground | `error` | terminal magenta |
+| `git-deleted-foreground` | Git marks for a deleted status | foreground | `diff.minus.gutter`, then `diff.minus` | terminal red |
+| `git-modified-foreground` | Git marks for a modified status | foreground | `diff.delta.gutter`, then `diff.delta` | terminal yellow |
+| `git-created-foreground` | Git marks for a created status | foreground | `diff.plus.gutter`, then `diff.plus` | terminal green |
 | `unsaved-mark-foreground` | Unsaved marks | foreground | `info` | terminal cyan |
 
 Helix theme-key lookup can fall back to a broader key. For example,
@@ -153,27 +153,22 @@ Row roles apply in this order:
 Label foregrounds apply in this order:
 
 1. Filesystem error
-2. Git status belonging to the entry itself
-3. Entry palette
-4. Git status aggregated from a directory's descendants
-5. Row foreground
+2. Entry palette
+3. Row foreground
 
-A directory takes the strongest Git status beneath it, which would otherwise
-color most of a working tree and bury what each row is. That aggregate
-therefore ranks below the Entry palette, while a status on the row itself stays
-above it. Without a palette the two Git ranks collapse into one, so nothing
-changes.
-
-Entry palette modifiers say what kind of entry a row holds, so they stay
-applied even when a status above them replaces the foreground. Guides and
-Unsaved marks use their own foregrounds. Ignored Git status dims only the exact
+Git status stays out of that list. It presents as the Git mark in its own
+column, the way Helix marks a changed hunk in its diff gutter, so a working
+tree full of changes never buries what each row is. Entry palette modifiers say
+what kind of entry a row holds, so they stay applied even when a filesystem
+error replaces the foreground. Guides, Git marks, and Unsaved marks use their
+own foregrounds. Ignored Git status carries no mark and dims only the exact
 label.
 
-Cursor marks use their row colors. Active file marks use their Theme role
-foreground and the row background. Git status does not recolor either mark.
+Cursor marks use their row colors. Active file marks and Git marks use their
+Theme role foreground and the row background.
 
 File icons keep their selected palette colors on Visible, Pinned, and Cursor
-rows. Neither Git status nor an Entry palette recolors them. A filesystem error
+rows. Neither a Git status nor an Entry palette recolors them. A filesystem error
 can replace the affected error icon foreground.
 
 ## Invalid values

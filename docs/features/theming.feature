@@ -17,7 +17,7 @@ Feature: Theme Grove
     When Helix starts with Grove in that Workspace
     And Grove is focused
     Then Cursor uses the configured row colors without source modifiers
-    And "modified.txt" uses the configured modified Git foreground
+    And "modified.txt" carries a configured modified Git mark
     And "plain.txt" uses the theme text foreground
 
   Scenario: Follow Helix theme changes for semantic sources
@@ -162,10 +162,10 @@ Feature: Theme Grove
       | row            | marker           | ANSI color |
       | broken-link    | label            | 9          |
       | broken-link    | Broken link icon | 9          |
-      | conflict.txt   | label            | 5          |
-      | deleted-dir    | label            | 1          |
-      | modified.txt   | label            | 3          |
-      | created.txt    | label            | 2          |
+      | conflict.txt   | Git mark         | 5          |
+      | deleted-dir    | Git mark         | 1          |
+      | modified.txt   | Git mark         | 3          |
+      | created.txt    | Git mark         | 2          |
       | active.txt     | Unsaved mark     | 6          |
       | Workspace root | Unsaved mark     | 6          |
 

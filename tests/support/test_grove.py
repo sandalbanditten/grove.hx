@@ -104,8 +104,8 @@ def test_grove_frame_rejects_multiple_cursors(tmp_path) -> None:
     with pytest.raises(AssertionError, match="multiple Cursor marks"):
         _frame(
             [
-                f"{'>· one.txt':24}▕{'':75}",
-                f"{'>· two.txt':24}▕{'two.txt ¦ GNR ¦ 1:1':75}",
+                f"{' >· one.txt':24}▕{'':75}",
+                f"{' >· two.txt':24}▕{'two.txt ¦ GNR ¦ 1:1':75}",
             ],
             workspace,
         )
@@ -114,7 +114,7 @@ def test_grove_frame_rejects_multiple_cursors(tmp_path) -> None:
 def test_grove_frame_decodes_cursor_on_workspace_root(tmp_path) -> None:
     workspace = WorkspaceFixture(tmp_path / "workspace")
     frame = _frame(
-        [f"{'>workspace':24}▕{'anchor.txt ¦ GNR ¦ 1:1':75}"],
+        [f"{' >workspace':24}▕{'anchor.txt ¦ GNR ¦ 1:1':75}"],
         workspace,
     )
 

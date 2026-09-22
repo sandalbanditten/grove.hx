@@ -45,12 +45,24 @@ class VisibleRow:
         return next((glyph for glyph in "▸▾" if glyph in self.text), None)
 
     @property
+    def git_mark(self) -> str:
+        return self.text[0:1]
+
+    @property
+    def has_cursor_mark(self) -> bool:
+        return self.text[1:2] == ">"
+
+    @property
     def has_unsaved_mark(self) -> bool:
         return self.text.endswith((" +", "…+"))
 
     @property
     def has_active_mark(self) -> bool:
         return "*" in self.text[: self.label_column]
+
+    @property
+    def git_mark_style(self) -> Style:
+        return self.styled.get_style_at_offset(_CONSOLE, 0)
 
     def style_at(self, marker: str) -> Style:
         offset = self.label_column if marker == self.label else self.text.find(marker)
@@ -167,7 +179,7 @@ class GroveFrame:
         root = _workspace_root(grove_lines, styled_lines, workspace)
         rows = _visible_rows(grove_lines, styled_lines, workspace)
         all_rows = ((root,) if root is not None else ()) + rows
-        cursors = tuple(row for row in all_rows if row.text.startswith(">"))
+        cursors = tuple(row for row in all_rows if row.has_cursor_mark)
         if len(cursors) > 1:
             raise AssertionError("Grove rendered multiple Cursor marks")
         if sum(row.has_active_mark for row in all_rows) > 1:
@@ -493,11 +505,8 @@ def _has_label(text: str, label: str) -> bool:
     if not text.endswith(label):
         return False
     start = len(text) - len(label)
-    if (
-        start
-        and not text[start - 1].isspace()
-        and not (start == 1 and text.startswith(">"))
-    ):
+    # The Cursor mark can sit flush against a label that has no icon area.
+    if start and not text[start - 1].isspace() and text[start - 1] != ">":
         return False
     return all(
         character.isspace()

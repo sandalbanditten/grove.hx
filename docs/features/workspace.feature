@@ -26,7 +26,7 @@ Feature: Follow Helix's current Workspace
       | shared.txt |
     And Git tracks "shared.txt" as clean in Workspace "second"
     When Helix starts with Grove in Workspace "first"
-    Then "shared.txt" uses the modified Git foreground
+    Then "shared.txt" carries a modified Git mark
     When Helix runs "cd" for Workspace "second"
     Then the File tree root is "second"
     And "shared.txt" uses the theme text foreground

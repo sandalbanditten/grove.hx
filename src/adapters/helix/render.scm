@@ -48,6 +48,20 @@
       (hash-ref current-theme 'active-file)]
     [else (hash-ref current-theme 'visible-row)]))
 
+; Helix marks a changed hunk with a bar in its diff gutter and a removal with
+; the cell's top edge. Grove reads the same shapes so a Git status stays out of
+; the entry label.
+(define (git-mark-glyph status)
+  (if (equal? status 'deleted) "▔" "▍"))
+
+(define (git-mark-run status current-theme base-style)
+  (define foreground
+    (and status (hash-try-get current-theme status)))
+  (if
+    foreground
+    (run (git-mark-glyph status) (style-fg base-style foreground))
+    (run " " base-style)))
+
 (define (row-leading-runs entry current-facts current-theme base-style)
   (define guides
     (hash-ref current-theme 'guides-foreground))
@@ -62,6 +76,10 @@
       base-style))
   (append
     (list
+      (git-mark-run
+        (row.git-status current-facts entry)
+        current-theme
+        base-style)
       (run (if (row.cursor? current-facts entry) ">" " ") base-style)
       (run (ancestry-indent entry guides) guides-style))
     (cond
@@ -174,25 +192,14 @@
   (define entry (layout.slot-entry slot))
   (define body-width (max 0 (- width 1)))
   (define error-icon (error-icon-for-kind (tree.entry-kind entry)))
+  ; Ignored has no Git mark and dims the label instead.
   (define git-status (row.git-status current-facts entry))
   (define entry-appearance (row.appearance current-facts entry))
-  ; Colored statuses are exactly the Theme roles named after them. Ignored has
-  ; no role and dims the label instead. A status on the entry itself outranks
-  ; the Entry palette; one aggregated from descendants does not, so a directory
-  ; keeps naming what it is when only its contents changed.
-  (define git-foreground
-    (and
-      git-status
-      (or
-        (not entry-appearance)
-        (row.exact-git-status? current-facts entry))
-      (hash-try-get current-theme git-status)))
   (define label-foreground
     (or
       (and
         error-icon
         (hash-ref current-theme 'filesystem-error-foreground))
-      git-foreground
       (and
         entry-appearance
         (theme.entry-color

@@ -100,11 +100,8 @@ _Avoid_: Style role, theme slot
 The optional `LS_COLORS` ruleset that colors Visible row labels the way
 `vivid`, `eza`, and GNU `ls` do. A label takes the rule for its entry kind, or
 for the longest filename pattern matching it. The palette supplies a foreground
-and modifiers only: a filesystem error, or a Git status belonging to the entry
-itself, replaces that foreground while the modifiers remain. A Git status
-aggregated from a directory's descendants does not, so a directory keeps naming
-what it is when only its contents changed. No rule reaches an icon, a mark, or
-any background.
+and modifiers only: a filesystem error replaces that foreground while the
+modifiers remain. No rule reaches an icon, a mark, or any background.
 _Avoid_: LS_COLORS theme, icon palette, file colors
 
 **File tree**:
@@ -137,14 +134,22 @@ keeps it visible but inert, with a distinct error presentation.
 _Avoid_: Inert symlink, unknown entry
 
 **Git status**:
-Grove's latest optional Git state for paths in the current Workspace. File names
-use the status foreground directly. Directory names use the strongest status
-beneath their path, including collapsed descendants, in this order: conflict,
-deleted, modified, created. Ignored status dims only the exact entry label. Git
-status never controls the File tree or recolors entry icons and Unsaved marks.
-Cursor styling keeps the Git foreground while applying its row background. Git
-status is scoped to the Workspace.
-_Avoid_: Git overlay, Git snapshot, Git truth, Git mark
+Grove's latest optional Git state for paths in the current Workspace. It
+presents through the Git mark and leaves entry labels alone. Directories take
+the strongest status beneath their path, including collapsed descendants, in
+this order: conflict, deleted, modified, created. Ignored status carries no mark
+and dims only the exact entry label. Git status never controls the File tree or
+recolors entry icons, labels, and Unsaved marks. Git status is scoped to the
+Workspace.
+_Avoid_: Git overlay, Git snapshot, Git truth, Git coloring
+
+**Git mark**:
+The single leading bar presenting Git status in its own column, before the
+Cursor mark. It follows Helix's own diff gutter: `▍` for a conflict, a
+modification, or a creation, and `▔` for a deletion, each in the Theme role
+named after its status. Every row reserves its position, so the mark never
+shifts File tree content and an absent status leaves the column blank.
+_Avoid_: Git gutter, status bar, Git overlay
 
 **Unsaved status**:
 The distinction between a file with unsaved edits (`unsaved`) and a directory

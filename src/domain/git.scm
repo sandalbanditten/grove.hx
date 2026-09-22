@@ -1,6 +1,6 @@
 (require (prefix-in path. "path.scm"))
 
-(provide path-status build status-for exact-status-for)
+(provide path-status build status-for)
 
 (struct path-status (id status))
 (struct status (exact-statuses descendant-statuses))
@@ -66,12 +66,6 @@
           (cdr remaining)
           (insert-exact exact id raw-status)
           (record-status-for-ancestors descendants id semantic))))))
-
-; The status recorded for this exact path, ignoring anything beneath it.
-(define (exact-status-for git-status id)
-  (and
-    git-status
-    (hash-try-get (status-exact-statuses git-status) id)))
 
 (define (status-for git-status id directory?)
   (if

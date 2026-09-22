@@ -253,8 +253,8 @@ def icon_mode_entries_align(grove: GroveDriver, file: str, directory: str) -> No
 
 @then(
     parsers.parse(
-        'the Workspace label starts in column 4 and "{directory}" and "{file}" '
-        "labels start in column 6"
+        'the Workspace label starts in column 5 and "{directory}" and "{file}" '
+        "labels start in column 7"
     )
 )
 def icon_label_columns(grove: GroveDriver, directory: str, file: str) -> None:
@@ -262,9 +262,9 @@ def icon_label_columns(grove: GroveDriver, directory: str, file: str) -> None:
     root = frame.pane.workspace_root if frame.pane else None
     directory_row = frame.row(scenario_path(directory))
     file_row = frame.row(scenario_path(file))
-    assert root is not None and root.label_column == 3
-    assert directory_row is not None and directory_row.label_column == 5
-    assert file_row is not None and file_row.label_column == 5
+    assert root is not None and root.label_column == 4
+    assert directory_row is not None and directory_row.label_column == 6
+    assert file_row is not None and file_row.label_column == 6
 
 
 @then(parsers.parse('"{name}" can expand'))
@@ -302,9 +302,9 @@ def labels_reclaim_icon_columns(
     directory_row = frame.row(scenario_path(directory))
     file_row = frame.row(scenario_path(file))
     assert root is not None and root.label == workspace.root.name
-    assert root.label_column == 1
-    assert directory_row is not None and directory_row.label_column == 3
-    assert file_row is not None and file_row.label_column == 3
+    assert root.label_column == 2
+    assert directory_row is not None and directory_row.label_column == 4
+    assert file_row is not None and file_row.label_column == 4
 
 
 def _frame_with_rows(grove: GroveDriver, *names: str) -> GroveFrame:

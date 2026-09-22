@@ -36,7 +36,7 @@ Feature: Present File tree status layers
     When the editor inserts "dirty-" without saving and returns to Normal mode
     Then "very-long-file-name.scm" clips with its Unsaved mark visible
 
-  Scenario: Color equivalent modified Git statuses alike
+  Scenario: Mark equivalent modified Git statuses alike
     Given a Workspace containing entries
       | path              |
       | modified.txt      |
@@ -53,10 +53,10 @@ Feature: Present File tree status layers
       | setting | value    |
       | icons   | disabled |
     When Helix starts with Grove in that Workspace
-    Then "modified.txt" uses the modified Git foreground
-    And "renamed.txt" uses the modified Git foreground
-    And "copied.txt" uses the modified Git foreground
-    And "type-change.txt" uses the modified Git foreground
+    Then "modified.txt" carries a modified Git mark
+    And "renamed.txt" carries a modified Git mark
+    And "copied.txt" carries a modified Git mark
+    And "type-change.txt" carries a modified Git mark
 
   Scenario: Keep Workspace row status scoped to Workspace files
     Given a Workspace containing entries
@@ -82,8 +82,8 @@ Feature: Present File tree status layers
       | icons   | disabled |
     When Helix starts with Grove in that Workspace
     And the "nested" directory is expanded
-    Then "nested" uses the created Git foreground
-    And "nested/file.txt" uses the theme text foreground
+    Then "nested" carries a created Git mark
+    And "nested/file.txt" carries no Git mark
 
   Scenario: Map status from a Git repository above the Workspace
     Given a Workspace containing entries
@@ -92,7 +92,7 @@ Feature: Present File tree status layers
     And "tracked.txt" is Active
     And a parent Git repository tracks "tracked.txt" as modified inside the Workspace
     When Helix starts with Grove in that Workspace
-    Then "tracked.txt" uses the modified Git foreground
+    Then "tracked.txt" carries a modified Git mark
 
   Scenario: Compose ordinary status layers on a Pinned row
     Given a Workspace containing entries
@@ -165,13 +165,13 @@ Feature: Present File tree status layers
 
     Scenario: Layer Git, failure, Unsaved, and Cursor presentation
       When Helix starts with Grove in that Workspace
-      Then "Workspace root" uses the conflict Git foreground
-      And "conflict-dir" uses the conflict Git foreground
-      And "deleted-dir" uses the deleted Git foreground
-      And "modified-dir" uses the modified Git foreground
-      And "modified.txt" uses the modified Git foreground
-      And "created-dir" uses the created Git foreground
-      And "created.txt" uses the created Git foreground
+      Then "Workspace root" carries a conflict Git mark
+      And "conflict-dir" carries a conflict Git mark
+      And "deleted-dir" carries a deleted Git mark
+      And "modified-dir" carries a modified Git mark
+      And "modified.txt" carries a modified Git mark
+      And "created-dir" carries a created Git mark
+      And "created.txt" carries a created Git mark
       And "broken-link" uses the broken-link icon and error foreground
       And ignored status dims the "ignored-dir" label only
       When "modified.txt" is activated
@@ -180,7 +180,7 @@ Feature: Present File tree status layers
       When Grove is focused
       Then the Cursor "modified.txt" row background spans its icon, label, and Unsaved mark
       And "modified.txt" uses the "dark" file icon variant
-      And "modified.txt" uses the modified Git foreground
+      And "modified.txt" carries a modified Git mark
       When "ignored.txt" is activated
       And the editor inserts "ignored-" without saving and returns to Normal mode
       Then ignored status dims the "ignored.txt" label only
@@ -193,24 +193,25 @@ Feature: Present File tree status layers
         | icons   | disabled |
       When Helix starts with Grove in that Workspace
       And the editor inserts "saved-" and saves
-      Then "clean.txt" uses the modified Git foreground
+      Then "clean.txt" carries a modified Git mark
       And these rows carry no Unsaved mark
         | row            |
         | Workspace root |
         | clean.txt      |
 
-    Scenario: Clear Git coloring when Git becomes unavailable
+    Scenario: Clear Git marks when Git becomes unavailable
       When Helix starts with Grove in that Workspace
-      Then "Workspace root" uses the conflict Git foreground
-      And "conflict-dir" uses the conflict Git foreground
-      And "deleted-dir" uses the deleted Git foreground
-      And "modified-dir" uses the modified Git foreground
-      And "modified.txt" uses the modified Git foreground
-      And "created-dir" uses the created Git foreground
-      And "created.txt" uses the created Git foreground
+      Then "Workspace root" carries a conflict Git mark
+      And "conflict-dir" carries a conflict Git mark
+      And "deleted-dir" carries a deleted Git mark
+      And "modified-dir" carries a modified Git mark
+      And "modified.txt" carries a modified Git mark
+      And "created-dir" carries a created Git mark
+      And "created.txt" carries a created Git mark
       When the editor inserts "dirty-" without saving and returns to Normal mode
       And Git metadata becomes unavailable
-      Then "modified.txt" uses the theme text foreground
+      Then "modified.txt" carries no Git mark
+      And "Workspace root" carries no Git mark
       And these rows carry one Unsaved mark
         | row            |
         | Workspace root |

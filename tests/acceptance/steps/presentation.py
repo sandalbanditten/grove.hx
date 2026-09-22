@@ -2,7 +2,7 @@ from pathlib import PurePath
 
 from pytest_bdd import parsers, then
 
-from tests.support.grove import GroveDriver, GroveFrame, VisibleRow
+from tests.support.grove import GroveDriver, GroveFrame, VisibleRow, _rgb
 
 from .rows import scenario_path
 
@@ -48,13 +48,22 @@ def grove_yields_to_helix(grove: GroveDriver) -> None:
 
 
 _FOREGROUNDS = {
-    "conflict Git": (255, 0, 255),
-    "deleted Git": (255, 0, 0),
-    "modified Git": (255, 255, 0),
-    "configured modified Git": (69, 103, 137),
-    "created Git": (0, 255, 0),
     "theme text": (216, 216, 216),
 }
+
+_GIT_MARKS = {
+    "conflict": ("\u258d", (255, 0, 255)),
+    "deleted": ("\u2594", (255, 0, 0)),
+    "modified": ("\u258d", (255, 255, 0)),
+    "configured modified": ("\u258d", (69, 103, 137)),
+    "created": ("\u258d", (0, 255, 0)),
+}
+
+
+def _named_row(frame: GroveFrame, name: str) -> VisibleRow | None:
+    if name == "Workspace root":
+        return frame.pane.workspace_root if frame.pane is not None else None
+    return frame.row(scenario_path(name))
 
 
 def _has_background(
@@ -65,13 +74,7 @@ def _has_background(
     return all(row.background_at(marker) == expected for marker in markers)
 
 
-@then(
-    parsers.re(
-        r'^"(?P<name>.+)" uses the '
-        r"(?P<foreground>conflict Git|deleted Git|modified Git|configured modified Git|created Git|theme text) "
-        r"foreground$"
-    )
-)
+@then(parsers.re(r'^"(?P<name>.+)" uses the (?P<foreground>theme text) foreground$'))
 def entry_uses_foreground(grove: GroveDriver, name: str, foreground: str) -> None:
     grove.wait(
         lambda frame: (
@@ -81,6 +84,44 @@ def entry_uses_foreground(grove: GroveDriver, name: str, foreground: str) -> Non
             else f'"{name}" did not use the {foreground} foreground'
         ),
     )
+
+
+@then(
+    parsers.re(
+        r'^"(?P<name>.+)" carries a (?P<status>conflict|deleted|modified|'
+        r"configured modified|created) Git mark$"
+    )
+)
+def entry_carries_git_mark(grove: GroveDriver, name: str, status: str) -> None:
+    glyph, expected = _GIT_MARKS[status]
+
+    def mismatch(frame: GroveFrame) -> str | None:
+        row = _named_row(frame, name)
+        if row is None:
+            return f'Grove did not show "{name}"'
+        if row.git_mark != glyph:
+            return f'"{name}" showed Git mark {row.git_mark!r}, not {glyph!r}'
+        actual = _rgb(row.git_mark_style.color)
+        if actual != expected:
+            return f'"{name}" Git mark used {actual}, not the {status} foreground'
+        return None
+
+    grove.wait(mismatch)
+
+
+@then(parsers.re(r'^"(?P<name>.+)" carries no Git mark$'))
+def entry_carries_no_git_mark(grove: GroveDriver, name: str) -> None:
+    def mismatch(frame: GroveFrame) -> str | None:
+        row = _named_row(frame, name)
+        if row is None:
+            return f'Grove did not show "{name}"'
+        return (
+            None
+            if row.git_mark == " "
+            else f'"{name}" carried Git mark {row.git_mark!r}'
+        )
+
+    grove.wait(mismatch)
 
 
 @then(
@@ -289,7 +330,8 @@ def pinned_row_keeps_ordinary_status_layers(grove: GroveDriver, name: str) -> No
             and "▾" in row.text
             and "" in row.text
             and "+" in row.text
-            and row.foreground_at(row.label) == (255, 255, 0)
+            and row.git_mark == "\u258d"
+            and _rgb(row.git_mark_style.color) == (255, 255, 0)
             and row.foreground_at("+") == (0, 255, 255)
             and _has_background(row, ("", row.label, "+"), (48, 48, 48))
             else f'Pinned row "{name}" lost ordinary status layers'

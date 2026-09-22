@@ -47,50 +47,38 @@ Feature: Color entry labels from an Entry palette
       | main.rs   | 40 50 60 |
       | docs.md   | 10 20 30 |
 
-  Scenario: Keep Entry modifiers when a Git status colors the label
-    Given a Workspace containing entries
-      | path         |
-      | anchor.txt   |
-      | modified.txt |
-    And "anchor.txt" is Active
-    And Git reports statuses
-      | path         | status   |
-      | modified.txt | modified |
-    And Grove reads these Entry colors
-      | key | code            |
-      | fi  | 1;38;2;40;50;60 |
-    When Helix starts with Grove in that Workspace
-    Then these rows use Entry colors
-      | row        | color    |
-      | anchor.txt | 40 50 60 |
-    And "anchor.txt" label is bold
-    And "modified.txt" uses the modified Git foreground
-    And "modified.txt" label is bold
-
-  Scenario: Keep a directory naming itself when only its contents changed
+  Scenario: Keep every label naming its entry while Git marks the changes
     Given a Workspace containing entries
       | kind      | path               |
       | file      | anchor.txt         |
+      | file      | modified.txt       |
       | directory | touched            |
       | file      | touched/inside.txt |
     And "anchor.txt" is Active
     And Git reports statuses
       | path               | status   |
+      | modified.txt       | modified |
       | touched/inside.txt | modified |
     And Grove reads these Entry colors
       | key | code            |
       | di  | 0;38;2;10;20;30 |
-      | fi  | 0;38;2;40;50;60 |
+      | fi  | 1;38;2;40;50;60 |
     When Helix starts with Grove in that Workspace
     Then these rows use Entry colors
       | row            | color    |
       | Workspace root | 10 20 30 |
       | touched        | 10 20 30 |
+      | anchor.txt     | 40 50 60 |
+      | modified.txt   | 40 50 60 |
+    And "modified.txt" label is bold
+    And "modified.txt" carries a modified Git mark
+    And "touched" carries a modified Git mark
+    And "anchor.txt" carries no Git mark
     When the "touched" directory is expanded
-    Then "touched/inside.txt" uses the modified Git foreground
+    Then "touched/inside.txt" carries a modified Git mark
     And these rows use Entry colors
-      | row        | color    |
-      | anchor.txt | 40 50 60 |
+      | row                | color    |
+      | touched/inside.txt | 40 50 60 |
 
   Scenario: Read the palette from the environment
     Given a Workspace containing entries

@@ -97,8 +97,8 @@ Feature: Size and place the Pane
 
     Examples:
       | entry                             | terminal | expected |
-      | a-considerably-long-file-name.txt | 100      | 40       |
-      | readme-notes.txt                  | 100      | 23       |
+      | a-considerably-long-file-name.txt | 100      | 41       |
+      | readme-notes.txt                  | 100      | 24       |
       | a-considerably-long-file-name.txt | 36       | 35       |
       | a.txt                             | 100      | 16       |
 
@@ -117,11 +117,11 @@ Feature: Size and place the Pane
     And the "outer" directory is expanded
     And Grove is focused
     And Grove receives "="
-    Then Grove has width 24
+    Then Grove has width 25
     And no File tree row is clipped
     When the "outer" directory is collapsed
     And Grove receives "="
-    Then Grove has width 17
+    Then Grove has width 18
     And no File tree row is clipped
 
   Scenario: Fit the width with icons disabled
@@ -137,7 +137,7 @@ Feature: Size and place the Pane
     When Helix starts with Grove in that Workspace
     And Grove is focused
     And Grove receives "="
-    Then Grove has width 21
+    Then Grove has width 22
     And no File tree row is clipped
 
   Scenario Outline: Resize from the Rail on either side

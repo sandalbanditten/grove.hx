@@ -102,9 +102,9 @@ set -gx LS_COLORS (vivid generate gruvbox-dark)
 (grove-start! #:ls-colors 'environment)
 ```
 
-Git status still colors the files it applies to, while directories keep their
-palette color. [THEMING.md](THEMING.md) covers the rules Grove reads, the
-`EZA_COLORS` supplement, and how the two combine.
+Git status stays out of the label: it shows as a bar in its own column, the way
+Helix marks a changed hunk in its diff gutter. [THEMING.md](THEMING.md) covers
+the rules Grove reads and the `EZA_COLORS` supplement.
 
 Visibility controls when Grove presents an available Pane and when Helix can
 use its space:

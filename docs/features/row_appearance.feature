@@ -12,7 +12,7 @@ Feature: Present File tree rows
     And "folder" uses the directory icon
     And "anchor.txt" uses the file icon
     And "anchor.txt" aligns with "folder" in icon mode
-    And the Workspace label starts in column 4 and "folder" and "anchor.txt" labels start in column 6
+    And the Workspace label starts in column 5 and "folder" and "anchor.txt" labels start in column 7
     And "folder" can expand
     When the "folder" directory is expanded
     Then "folder/inside.txt" is indented two columns from "folder"
@@ -69,7 +69,7 @@ Feature: Present File tree rows
       | active.txt | modified |
     When Helix starts with Grove in that Workspace
     Then "active.txt" uses the Active file mark
-    And "active.txt" uses the modified Git foreground
+    And "active.txt" carries a modified Git mark
     And "active.txt" has no Cursor mark
     And "plain.txt" has no Cursor mark
     When Grove is focused
@@ -92,8 +92,8 @@ Feature: Present File tree rows
       | anchor.txt        | modified |
       | locked/inside.txt | modified |
     When Helix starts with Grove in that Workspace
-    Then "locked" uses the modified Git foreground
-    And "anchor.txt" uses the modified Git foreground
+    Then "locked" carries a modified Git mark
+    And "anchor.txt" carries a modified Git mark
     When the "locked" directory is expanded
     Then the File tree shows "locked/inside.txt"
     When "locked" becomes unreadable

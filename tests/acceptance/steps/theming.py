@@ -352,13 +352,16 @@ def rows_use_terminal_fallback_colors(
             row = frame.row(scenario_path(name))
             if row is None:
                 return f'Grove did not show "{name}"'
-            marker = {
-                "label": row.label,
-                "Broken link icon": "󰌺",
-                "Unsaved mark": "+",
-            }[marker_name]
             color = int(color_text)
-            style_color = row.style_at(marker).color
+            if marker_name == "Git mark":
+                style_color = row.git_mark_style.color
+            else:
+                marker = {
+                    "label": row.label,
+                    "Broken link icon": "󰌺",
+                    "Unsaved mark": "+",
+                }[marker_name]
+                style_color = row.style_at(marker).color
             actual = style_color.number if style_color is not None else None
             if actual != color:
                 return f'"{name}" {marker_name} used ANSI color {actual!r}, not {color}'

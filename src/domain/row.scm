@@ -8,7 +8,6 @@
   label
   natural-width
   appearance
-  exact-git-status?
   git-status
   unsaved-status
   active-file?
@@ -32,8 +31,8 @@
 ; ADR 0012 keeps arithmetic within the arity Steel's JIT compiles.
 (define (fixed-width id root? icons?)
   (+
-    ; Cursor mark, expansion control, and Unsaved mark
-    (if root? 2 3)
+    ; Git mark, Cursor mark, expansion control, and Unsaved mark
+    (if root? 3 4)
     ; Ancestor traces
     (* 2 (max 0 (- (path.depth id) 1)))
     (icon-area-width root? icons?)))
@@ -73,16 +72,6 @@
       (facts-git-status current-facts)
       (tree.entry-id entry)
       (tree.directory-kind? kind))))
-
-; Grove aggregates a directory's Git status from everything beneath it. That
-; aggregate says only that something below changed, so presentation may rank it
-; below a rule that names the row itself.
-(define (exact-git-status? current-facts entry)
-  (and
-    (git.exact-status-for
-      (facts-git-status current-facts)
-      (tree.entry-id entry))
-    #t))
 
 (define (unsaved-status current-facts entry)
   (define id (tree.entry-id entry))
