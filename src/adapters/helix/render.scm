@@ -176,14 +176,23 @@
   (define error-icon (error-icon-for-kind (tree.entry-kind entry)))
   (define git-status (row.git-status current-facts entry))
   (define entry-appearance (row.appearance current-facts entry))
+  ; Colored statuses are exactly the Theme roles named after them. Ignored has
+  ; no role and dims the label instead. A status on the entry itself outranks
+  ; the Entry palette; one aggregated from descendants does not, so a directory
+  ; keeps naming what it is when only its contents changed.
+  (define git-foreground
+    (and
+      git-status
+      (or
+        (not entry-appearance)
+        (row.exact-git-status? current-facts entry))
+      (hash-try-get current-theme git-status)))
   (define label-foreground
     (or
       (and
         error-icon
         (hash-ref current-theme 'filesystem-error-foreground))
-      ; Colored statuses are exactly the Theme roles named after them.
-      ; Ignored has no role and dims the label instead.
-      (and git-status (hash-try-get current-theme git-status))
+      git-foreground
       (and
         entry-appearance
         (theme.entry-color

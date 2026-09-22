@@ -150,12 +150,24 @@
     (commit-and-redraw-if-needed! update-result))
   (input.result-pass-through? result))
 
-; `LS_COLORS` is read once. A missing variable simply leaves Grove on its
-; Theme roles rather than failing startup.
+(define (environment-text name)
+  (with-handler (lambda (_cause) #f) (env-var name)))
+
+(define (joined left right)
+  (cond
+    [(not (string? left)) right]
+    [(not (string? right)) left]
+    [else (string-append left (string-append ":" right))]))
+
+; The environment is read once. `EZA_COLORS` follows `LS_COLORS` so its rules
+; win, which is the order `eza` itself resolves them in. A missing variable
+; leaves Grove on its Theme roles rather than failing startup.
 (define (ls-colors-text source)
   (cond
     [(equal? source 'environment)
-      (with-handler (lambda (_cause) #f) (env-var "LS_COLORS"))]
+      (joined
+        (environment-text "LS_COLORS")
+        (environment-text "EZA_COLORS"))]
     [(string? source) source]
     [else #f]))
 

@@ -75,7 +75,7 @@ file picker before Steel components mount.
 | --- | --- | --- | --- |
 | `#:icons` | `#t` | `#t` or `#f` | Shows file icons. Requires a terminal font with Nerd Fonts 3.3 glyphs. |
 | `#:guides` | `#t` | `#t` or `#f` | Shows ancestor traces and Leaf marks. Cursor (`>`) and Active file (`*`) marks remain visible when disabled. |
-| `#:ls-colors` | `#f` | `#f`, `'environment`, or an `LS_COLORS` string | Colors entry labels from an `LS_COLORS` palette, the way `eza` does. `'environment` reads the variable at startup. See [THEMING.md](THEMING.md). |
+| `#:ls-colors` | `#f` | `#f`, `'environment`, or an `LS_COLORS` string | Colors entry labels from an `LS_COLORS` palette, the way `eza` does. `'environment` reads `LS_COLORS` then `EZA_COLORS` at startup. See [THEMING.md](THEMING.md). |
 | `#:side` | `'left` | `'left` or `'right` | Places Grove on that side of the editor. |
 | `#:theme` | `(grove-theme)` | A `grove-theme` value | Follows the active Helix theme by default. See [THEMING.md](THEMING.md) for role and color overrides. |
 | `#:width` | `32` | `16` through `64` | Sets the total width, including the Rail that separates Grove from the editor and acts as its scrollbar. |
@@ -102,8 +102,9 @@ set -gx LS_COLORS (vivid generate gruvbox-dark)
 (grove-start! #:ls-colors 'environment)
 ```
 
-Git status still colors the entries it applies to. [THEMING.md](THEMING.md)
-covers the rules Grove reads and how the two combine.
+Git status still colors the files it applies to, while directories keep their
+palette color. [THEMING.md](THEMING.md) covers the rules Grove reads, the
+`EZA_COLORS` supplement, and how the two combine.
 
 Visibility controls when Grove presents an available Pane and when Helix can
 use its space:

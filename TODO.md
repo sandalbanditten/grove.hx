@@ -1,6 +1,6 @@
 # TODO
 
-## Finish `LS_COLORS` impl: some files are not the same color, and src/ dirs are yellow
+## Use a 'bar' character to track git changes, like helix itself does in the gutter, instead of filename color changes
 
 ## Use the same icons as `eza`
 

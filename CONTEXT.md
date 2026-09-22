@@ -100,9 +100,11 @@ _Avoid_: Style role, theme slot
 The optional `LS_COLORS` ruleset that colors Visible row labels the way
 `vivid`, `eza`, and GNU `ls` do. A label takes the rule for its entry kind, or
 for the longest filename pattern matching it. The palette supplies a foreground
-and modifiers only: a filesystem error or Git status replaces that foreground
-while the modifiers remain, and no rule reaches an icon, a mark, or any
-background.
+and modifiers only: a filesystem error, or a Git status belonging to the entry
+itself, replaces that foreground while the modifiers remain. A Git status
+aggregated from a directory's descendants does not, so a directory keeps naming
+what it is when only its contents changed. No rule reaches an icon, a mark, or
+any background.
 _Avoid_: LS_COLORS theme, icon palette, file colors
 
 **File tree**:

@@ -93,7 +93,8 @@ Pass the generated spec directly:
 ```
 
 Or read whatever the shell exported, which is the usual way to follow a `vivid`
-theme:
+theme. Grove reads `LS_COLORS` and then `EZA_COLORS`, so a rule in the second
+wins, exactly as `eza` resolves them:
 
 ```sh
 # ~/.config/fish/config.fish, or the equivalent for your shell
@@ -104,9 +105,17 @@ set -gx LS_COLORS (vivid generate gruvbox-dark)
 (grove-start! #:ls-colors 'environment)
 ```
 
-`'environment` reads `LS_COLORS` once, when Grove starts. Changing the variable
-afterwards needs a new Helix process. When the variable is unset or empty,
-Grove keeps its Theme role colors instead of failing to start.
+`'environment` reads both variables once, when Grove starts. Changing them
+afterwards needs a new Helix process. When neither is set, Grove keeps its
+Theme role colors instead of failing to start.
+
+`eza` also carries built-in colors for extensions no palette mentions, and
+`vivid` themes do not cover every language. Grove follows the palette alone, so
+an extension missing from it takes `fi`. Add the rule to make both agree:
+
+```sh
+set -gx EZA_COLORS "*.scm=1;38;2;250;189;47"
+```
 
 ### Rules Grove reads
 
@@ -144,9 +153,16 @@ Row roles apply in this order:
 Label foregrounds apply in this order:
 
 1. Filesystem error
-2. Git status
+2. Git status belonging to the entry itself
 3. Entry palette
-4. Row foreground
+4. Git status aggregated from a directory's descendants
+5. Row foreground
+
+A directory takes the strongest Git status beneath it, which would otherwise
+color most of a working tree and bury what each row is. That aggregate
+therefore ranks below the Entry palette, while a status on the row itself stays
+above it. Without a palette the two Git ranks collapse into one, so nothing
+changes.
 
 Entry palette modifiers say what kind of entry a row holds, so they stay
 applied even when a status above them replaces the foreground. Guides and

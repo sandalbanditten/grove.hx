@@ -41,11 +41,17 @@ def helix_environment() -> dict[str, str]:
 
 
 @given(
-    parsers.parse('the environment sets LS_COLORS to "{spec}"'),
+    parsers.re(
+        r'^the environment sets (?P<name>LS_COLORS|EZA_COLORS) to "(?P<spec>.*)"$'
+    ),
     target_fixture="helix_environment",
 )
-def environment_sets_ls_colors(spec: str) -> dict[str, str]:
-    return {"LS_COLORS": spec}
+def environment_sets_colors(
+    name: str,
+    spec: str,
+    helix_environment: dict[str, str],
+) -> dict[str, str]:
+    return {**helix_environment, name: spec}
 
 
 @given(

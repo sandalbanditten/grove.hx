@@ -67,12 +67,39 @@ Feature: Color entry labels from an Entry palette
     And "modified.txt" uses the modified Git foreground
     And "modified.txt" label is bold
 
+  Scenario: Keep a directory naming itself when only its contents changed
+    Given a Workspace containing entries
+      | kind      | path               |
+      | file      | anchor.txt         |
+      | directory | touched            |
+      | file      | touched/inside.txt |
+    And "anchor.txt" is Active
+    And Git reports statuses
+      | path               | status   |
+      | touched/inside.txt | modified |
+    And Grove reads these Entry colors
+      | key | code            |
+      | di  | 0;38;2;10;20;30 |
+      | fi  | 0;38;2;40;50;60 |
+    When Helix starts with Grove in that Workspace
+    Then these rows use Entry colors
+      | row            | color    |
+      | Workspace root | 10 20 30 |
+      | touched        | 10 20 30 |
+    When the "touched" directory is expanded
+    Then "touched/inside.txt" uses the modified Git foreground
+    And these rows use Entry colors
+      | row        | color    |
+      | anchor.txt | 40 50 60 |
+
   Scenario: Read the palette from the environment
     Given a Workspace containing entries
       | path       |
       | anchor.txt |
+      | notes.md   |
     And "anchor.txt" is Active
-    And the environment sets LS_COLORS to "fi=0;38;2;40;50;60:di=0;38;2;10;20;30"
+    And the environment sets LS_COLORS to "fi=0;38;2;40;50;60:*.md=0;38;2;1;2;3"
+    And the environment sets EZA_COLORS to "*.md=0;38;2;70;80;90"
     And Grove settings
       | setting   | value       |
       | ls-colors | environment |
@@ -80,6 +107,7 @@ Feature: Color entry labels from an Entry palette
     Then these rows use Entry colors
       | row        | color    |
       | anchor.txt | 40 50 60 |
+      | notes.md   | 70 80 90 |
 
   Scenario Outline: Keep Theme role colors without a usable palette
     Given a Workspace containing entries
