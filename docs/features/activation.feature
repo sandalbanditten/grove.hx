@@ -81,6 +81,7 @@ Feature: Activate files
     And "anchor.txt" is Active
     When Helix starts with Grove in that Workspace
     And Grove is focused
+    And Grove receives "Escape"
     And Grove receives Helix's file-picker chord and searches for "inside"
     Then Helix shows the "folder/inside.txt" document
     And the File tree does not show "folder/inside.txt"
@@ -154,7 +155,7 @@ Feature: Activate files
     When Grove is focused
     Then "Workspace root" has Cursor
 
-  Scenario: Keep Grove focused after activating a directory
+  Scenario Outline: Keep Grove focused after activating a directory
     Given a Workspace containing entries
       | kind      | path              |
       | file      | anchor.txt        |
@@ -164,11 +165,16 @@ Feature: Activate files
     When Helix starts with Grove in that Workspace
     And Grove is focused
     And Grove receives "Up"
-    And Grove receives "Enter"
+    And Grove receives "<key>"
     Then "folder" has Cursor
     When Grove receives "Down"
-    And Grove receives "Enter"
+    And Grove receives "<key>"
     Then Helix shows the "folder/inside.txt" document
+
+    Examples:
+      | key   |
+      | Enter |
+      | Space |
 
   Scenario: Preserve the editor view when activating an open file
     Given a Workspace containing entries

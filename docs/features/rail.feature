@@ -63,6 +63,7 @@ Feature: Navigate and resize with the Rail
 
     Scenario: Let a key cancel a Rail drag
       When the Rail thumb is pressed
+      And Grove receives "Escape"
       And Grove receives Helix's file-picker chord and searches for "page-10"
       And the pointer moves horizontally
       Then Helix shows the "page-10.txt" document

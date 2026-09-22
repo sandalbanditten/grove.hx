@@ -48,7 +48,7 @@
       (model.cursor-expansion-requested current-model 'expand)]
     [(or (key-event-left? event) (plain? #\h))
       (model.cursor-expansion-requested current-model 'collapse)]
-    [(key-event-enter? event)
+    [(or (key-event-enter? event) (plain? #\space))
       (model.cursor-open-requested current-model 'normal)]
     [(key-event-escape? event) (model.focus-released current-model)]
     [(and (= modifier key-modifier-ctrl)

@@ -54,7 +54,7 @@ Feature: Navigate the File tree with the keyboard
     When Grove receives "Enter"
     Then Helix shows the "anchor.txt" document
 
-  Scenario: Pass an unbound key to Helix
+  Scenario: Reach a Helix chord after releasing Grove
     Given a Workspace containing entries
       | path       |
       | anchor.txt |
@@ -62,6 +62,7 @@ Feature: Navigate the File tree with the keyboard
     And "anchor.txt" is Active
     When Helix starts with Grove in that Workspace
     And Grove is focused
+    And Grove receives "Escape"
     And Grove receives Helix's file-picker chord and searches for "target"
     Then Helix shows the "target.txt" document
 
@@ -179,6 +180,7 @@ Feature: Navigate the File tree with the keyboard
     When Helix starts with Grove in that Workspace
     And the terminal height becomes <height> rows
     And Grove is focused
+    And Grove receives "Escape"
     And Grove receives Helix's file-picker chord and searches for "page-39"
     And Grove is focused
     And Grove receives "PageUp"

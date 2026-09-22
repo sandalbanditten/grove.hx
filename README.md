@@ -124,7 +124,7 @@ binding. Mouse input works without focusing Grove.
 | `j` / `k`, `Up` / `Down` | Move through the tree |
 | `h` / `l`, `Left` / `Right` | Collapse or expand a directory |
 | `PageUp` / `PageDown` | Move by one visible page |
-| `Enter` | Toggle a directory or open a file |
+| `Enter` / `Space` | Toggle a directory or open a file |
 | `Ctrl-s` | Open a file in a horizontal split |
 | `Ctrl-v` | Open a file in a vertical split |
 | `n` | Create and open a new file |
@@ -140,3 +140,8 @@ binding. Mouse input works without focusing Grove.
 
 The first key Grove does not bind returns focus to Helix and continues there,
 so existing Helix mappings remain available.
+
+`Space` is one of the keys Grove binds. If it is also your Helix leader, press
+`Escape` first to start a leader chord such as `Space f` from a focused Grove.
+Drop `Space` from the `Enter` row in `key-update` if you would rather keep the
+leader reachable.
