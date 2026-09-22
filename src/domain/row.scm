@@ -2,10 +2,12 @@
 (require (prefix-in git. "git.scm"))
 (require (prefix-in path. "path.scm"))
 (require (prefix-in expansion. "expansion.scm"))
+(require (prefix-in palette. "palette.scm"))
 
 (provide facts
   label
   natural-width
+  appearance
   git-status
   unsaved-status
   active-file?
@@ -13,7 +15,7 @@
   expanded?)
 
 (struct facts
-  (root git-status unsaved-ids active-id cursor expansion))
+  (root git-status unsaved-ids active-id cursor expansion palette))
 
 (define (label current-facts entry)
   (define id (tree.entry-id entry))
@@ -42,6 +44,25 @@
   (+
     (fixed-width id (path.root-id? id) icons?)
     (string-length (label current-facts entry))))
+
+; An Entry palette resolves a name by what kind of thing it is. Grove's kinds
+; collapse onto the four that the format separates for a File tree, so an
+; unfollowed directory link resolves as the link it is.
+(define (palette-kind kind)
+  (cond
+    [(member kind '(directory unreadable-directory)) 'directory]
+    [(member kind '(file-link directory-link)) 'link]
+    [(equal? kind 'broken-link) 'orphan]
+    [else 'file]))
+
+(define (appearance current-facts entry)
+  (define entry-palette (facts-palette current-facts))
+  (and
+    entry-palette
+    (palette.appearance-for
+      entry-palette
+      (label current-facts entry)
+      (palette-kind (tree.entry-kind entry)))))
 
 (define (git-status current-facts entry)
   (define kind (tree.entry-kind entry))

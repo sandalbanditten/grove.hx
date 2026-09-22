@@ -4,7 +4,7 @@ import json
 import os
 import re
 import shutil
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -173,6 +173,7 @@ class HelixSandbox:
         documents: tuple[Path, ...] = (),
         init: str = "",
         theme: str = TEST_THEME,
+        environment: Mapping[str, str | None] | None = None,
     ) -> HelixDriver:
         self.root.mkdir(parents=True, exist_ok=True)
         config_home, steel_home = self._prepare_homes(init, theme)
@@ -189,6 +190,8 @@ class HelixSandbox:
                 env={
                     "XDG_CONFIG_HOME": str(config_home),
                     "STEEL_HOME": str(steel_home),
+                    "LS_COLORS": None,
+                    **(environment or {}),
                 },
             )
         )

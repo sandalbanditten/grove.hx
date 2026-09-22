@@ -80,6 +80,58 @@ background from its two default keys. This means `ui.bufferline.active` can use
 them supplies a background, the Active file keeps the Visible row background.
 A configured override replaces this default chain.
 
+## Entry palette
+
+Theme roles give every label the same foreground. An Entry palette colors each
+label by what the entry is instead, from the `LS_COLORS` format that `vivid`,
+`eza`, and GNU `ls` share.
+
+Pass the generated spec directly:
+
+```scheme
+(grove-start! #:ls-colors "di=0;38;2;69;133;136:*.rs=0;38;2;152;151;26")
+```
+
+Or read whatever the shell exported, which is the usual way to follow a `vivid`
+theme:
+
+```sh
+# ~/.config/fish/config.fish, or the equivalent for your shell
+set -gx LS_COLORS (vivid generate gruvbox-dark)
+```
+
+```scheme
+(grove-start! #:ls-colors 'environment)
+```
+
+`'environment` reads `LS_COLORS` once, when Grove starts. Changing the variable
+afterwards needs a new Helix process. When the variable is unset or empty,
+Grove keeps its Theme role colors instead of failing to start.
+
+### Rules Grove reads
+
+| Entry | Rule |
+| --- | --- |
+| Directory, Unreadable directory, Workspace root | `di` |
+| File link, Unfollowed directory link | `ln` |
+| Broken link | `or` |
+| File matching a filename pattern | that pattern |
+| Every other file | `fi` |
+
+Only files consult filename patterns, so a directory named `docs.md` stays a
+directory. When several patterns match, the longest wins, which is what lets
+`*README.md` beat `*.md`. Matching is case sensitive, as it is in `eza`.
+
+Grove reads the foreground and the bold, dim, and italic attributes from a
+rule. It ignores the background, the reversing and hiding attributes, and
+underline. See
+[ADR 0014](docs/adr/0014-limit-the-entry-palette-to-safe-foreground-parts.md)
+for why.
+
+Grove cannot read a file's permission bits through Steel, so the executable
+rule `ex` never applies. An executable file takes its filename pattern, or
+`fi`.
+
 ## Overlap
 
 Row roles apply in this order:
@@ -89,18 +141,30 @@ Row roles apply in this order:
 3. Active file
 4. Visible row
 
-Filesystem errors override Git status for the affected label. Git status
-overrides the row foreground. Guides and Unsaved marks use their own
-foregrounds. Ignored Git status dims only the exact label.
+Label foregrounds apply in this order:
+
+1. Filesystem error
+2. Git status
+3. Entry palette
+4. Row foreground
+
+Entry palette modifiers say what kind of entry a row holds, so they stay
+applied even when a status above them replaces the foreground. Guides and
+Unsaved marks use their own foregrounds. Ignored Git status dims only the exact
+label.
 
 Cursor marks use their row colors. Active file marks use their Theme role
 foreground and the row background. Git status does not recolor either mark.
 
 File icons keep their selected palette colors on Visible, Pinned, and Cursor
-rows. Git status does not recolor them. A filesystem error can replace the
-affected error icon foreground.
+rows. Neither Git status nor an Entry palette recolors them. A filesystem error
+can replace the affected error icon foreground.
 
 ## Invalid values
 
 `#:theme` must receive a `grove-theme`. Each role must contain `#f`, a non-empty
-theme key, or a Style. Grove reports invalid values during startup.
+theme key, or a Style. `#:ls-colors` must contain `#f`, `'environment`, or a
+string. Grove reports invalid values during startup.
+
+An unreadable rule inside an otherwise valid spec is skipped rather than
+rejected, because `LS_COLORS` in the wild collects entries from many tools.

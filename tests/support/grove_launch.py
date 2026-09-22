@@ -20,6 +20,7 @@ _SETTING_VALUES = {
     "middle": "'middle",
     "wide text": json.dumps("wide"),
     "non-boolean": "'enabled",
+    "environment": "'environment",
 }
 
 
@@ -33,6 +34,7 @@ def start_grove(
     settings: Mapping[str, str] | None = None,
     theme: str | None = None,
     init: str = "",
+    environment: Mapping[str, str | None] | None = None,
 ) -> GroveDriver:
     helix = start_grove_helix(
         sandbox,
@@ -43,6 +45,7 @@ def start_grove(
         settings=settings,
         theme=theme,
         init=init,
+        environment=environment,
     )
     try:
         grove = GroveDriver(helix, workspace)
@@ -69,6 +72,7 @@ def start_grove_helix(
     starts: int = 1,
     theme: str | None = None,
     init: str = "",
+    environment: Mapping[str, str | None] | None = None,
 ) -> HelixDriver:
     arguments = " ".join(
         f"#:{name} {_SETTING_VALUES.get(value, value)}"
@@ -82,6 +86,7 @@ def start_grove_helix(
         documents=(active_file,) if active_file is not None else (),
         init=_grove_init(repository, startup, init),
         theme=theme or TEST_THEME,
+        environment=environment,
     )
 
 

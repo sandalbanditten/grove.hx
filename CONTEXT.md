@@ -96,6 +96,15 @@ A named visual part of Grove. Its documented colors can follow a Helix theme
 key or use fixed colors.
 _Avoid_: Style role, theme slot
 
+**Entry palette**:
+The optional `LS_COLORS` ruleset that colors Visible row labels the way
+`vivid`, `eza`, and GNU `ls` do. A label takes the rule for its entry kind, or
+for the longest filename pattern matching it. The palette supplies a foreground
+and modifiers only: a filesystem error or Git status replaces that foreground
+while the modifiers remain, and no rule reaches an icon, a mark, or any
+background.
+_Avoid_: LS_COLORS theme, icon palette, file colors
+
 **File tree**:
 One immutable ordered filesystem hierarchy containing the entries currently
 known to Grove from the latest Observation snapshot. Its Workspace root is a

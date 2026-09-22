@@ -62,7 +62,19 @@
       (valid-theme-source? (cdr (car sources)))
       (valid-theme-sources? (cdr sources)))))
 
-(define (validate-settings side width icons? guides? visibility theme)
+(define (valid-ls-colors? value)
+  (or
+    (not value)
+    (equal? value 'environment)
+    (string? value)))
+
+(define (validate-settings side
+         width
+         icons?
+         guides?
+         visibility
+         theme
+         ls-colors)
   (unless (or (equal? side 'left) (equal? side 'right))
     (error "invalid Grove side"))
   (unless (and (integer? width) (>= width 16) (<= width 64))
@@ -76,7 +88,9 @@
   (unless (grove-theme-value? theme)
     (error "invalid Grove theme"))
   (unless (valid-theme-sources? (grove-theme-value-sources theme))
-    (error "invalid Grove theme source")))
+    (error "invalid Grove theme source"))
+  (unless (valid-ls-colors? ls-colors)
+    (error "invalid Grove LS_COLORS")))
 
 (define (grove-start! #:icons [icons? #t]
          #:guides
@@ -88,15 +102,18 @@
          #:side
          [side 'left]
          #:width
-         [width 32])
-  (validate-settings side width icons? guides? visibility theme)
+         [width 32]
+         #:ls-colors
+         [ls-colors #f])
+  (validate-settings side width icons? guides? visibility theme ls-colors)
   (helix.start!
     side
     width
     icons?
     guides?
     visibility
-    (grove-theme-value-sources theme)))
+    (grove-theme-value-sources theme)
+    ls-colors))
 
 ;;@doc
 ;;Focus Grove.

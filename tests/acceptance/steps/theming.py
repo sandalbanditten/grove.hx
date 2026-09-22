@@ -31,6 +31,78 @@ def invalid_grove_theme(configuration: str) -> dict[str, str]:
     return {"theme": _INVALID_THEMES[configuration]}
 
 
+@given("Grove reads these Entry colors", target_fixture="grove_settings")
+def configured_entry_colors(
+    datatable: list[list[str]],
+    grove_settings: dict[str, str],
+) -> dict[str, str]:
+    header, *rows = datatable
+    spec = ":".join(
+        f"{record['key']}={record['code']}"
+        for record in (dict(zip(header, row)) for row in rows)
+    )
+    return {**grove_settings, "ls-colors": json.dumps(spec)}
+
+
+@then("these rows use Entry colors")
+def rows_use_entry_colors(grove: GroveDriver, datatable: list[list[str]]) -> None:
+    header, *rows = datatable
+    expected = {
+        record["row"]: tuple(int(part) for part in record["color"].split())
+        for record in (dict(zip(header, row)) for row in rows)
+    }
+
+    def mismatch(frame: GroveFrame) -> str | None:
+        for name, color in expected.items():
+            row = (
+                frame.pane.workspace_root
+                if name == "Workspace root" and frame.pane is not None
+                else frame.row(scenario_path(name))
+            )
+            if row is None:
+                return f'Grove did not show "{name}"'
+            if row.foreground_at(row.label) != color:
+                return (
+                    f'"{name}" used {row.foreground_at(row.label)} '
+                    f"rather than the Entry color {color}"
+                )
+        return None
+
+    grove.wait(mismatch)
+
+
+@then(parsers.re(r'^"(?P<name>.+)" label is (?P<modifier>bold|italic)$'))
+def label_uses_modifier(grove: GroveDriver, name: str, modifier: str) -> None:
+    def mismatch(frame: GroveFrame) -> str | None:
+        row = frame.row(scenario_path(name))
+        if row is None:
+            return f'Grove did not show "{name}"'
+        applied = (
+            row.is_bold_at(row.label)
+            if modifier == "bold"
+            else row.is_italic_at(row.label)
+        )
+        return None if applied else f'"{name}" label was not {modifier}'
+
+    grove.wait(mismatch)
+
+
+@then(parsers.re(r'^"(?P<name>.+)" label is not (?P<modifier>bold|italic)$'))
+def label_omits_modifier(grove: GroveDriver, name: str, modifier: str) -> None:
+    def mismatch(frame: GroveFrame) -> str | None:
+        row = frame.row(scenario_path(name))
+        if row is None:
+            return f'Grove did not show "{name}"'
+        applied = (
+            row.is_bold_at(row.label)
+            if modifier == "bold"
+            else row.is_italic_at(row.label)
+        )
+        return f'"{name}" label was {modifier}' if applied else None
+
+    grove.wait(mismatch)
+
+
 @given("a Grove theme assigns these sources", target_fixture="grove_settings")
 def configured_grove_theme(
     datatable: list[list[str]],

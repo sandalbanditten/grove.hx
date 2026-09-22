@@ -71,6 +71,12 @@ class VisibleRow:
     def is_dimmed_at(self, marker: str) -> bool:
         return self.style_at(marker).dim
 
+    def is_bold_at(self, marker: str) -> bool:
+        return bool(self.style_at(marker).bold)
+
+    def is_italic_at(self, marker: str) -> bool:
+        return bool(self.style_at(marker).italic)
+
 
 @dataclass(frozen=True)
 class Rail:

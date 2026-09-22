@@ -47,7 +47,8 @@
     side
     icons?
     guides?
-    visibility))
+    visibility
+    palette))
 
 (struct observation-snapshot (root tree git-status active-id))
 
@@ -126,7 +127,8 @@
     (model-value-side model)
     (model-value-icons? model)
     (model-value-guides? model)
-    visibility-value))
+    visibility-value
+    (model-value-palette model)))
 
 (define (without-focus model)
   (copy-model model #:cursor #f))
@@ -146,7 +148,8 @@
     (model-value-unsaved-ids model)
     (model-value-active-id model)
     (model-value-cursor model)
-    (model-value-expansion model)))
+    (model-value-expansion model)
+    (model-value-palette model)))
 
 (define (resolved-layout-for model entries)
   (layout.resolve
@@ -172,7 +175,12 @@
 (define (request-refresh model)
   (update-result model (command 'refresh)))
 
-(define (init side-value width-value icons-value guides-value visibility-value)
+(define (init side-value
+         width-value
+         icons-value
+         guides-value
+         visibility-value
+         palette-value)
   (model-value
     #f
     #f
@@ -187,7 +195,8 @@
     side-value
     icons-value
     guides-value
-    visibility-value))
+    visibility-value
+    palette-value))
 
 (define (first-surviving-id entries new-ids)
   (define found

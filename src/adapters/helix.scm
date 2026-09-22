@@ -3,6 +3,7 @@
 (require (prefix-in layout. "../domain/layout.scm"))
 (require (prefix-in model. "../domain/model.scm"))
 (require (prefix-in path. "../domain/path.scm"))
+(require (prefix-in palette. "../domain/palette.scm"))
 (require (prefix-in render. "helix/render.scm"))
 (require (prefix-in scanner. "scanner.scm"))
 (require (prefix-in git. "git.scm"))
@@ -149,20 +150,44 @@
     (commit-and-redraw-if-needed! update-result))
   (input.result-pass-through? result))
 
-(define (start-runtime! side width icons? guides? visibility)
-  (set! *model* (model.init side width icons? guides? visibility))
+; `LS_COLORS` is read once. A missing variable simply leaves Grove on its
+; Theme roles rather than failing startup.
+(define (ls-colors-text source)
+  (cond
+    [(equal? source 'environment)
+      (with-handler (lambda (_cause) #f) (env-var "LS_COLORS"))]
+    [(string? source) source]
+    [else #f]))
+
+(define (entry-palette-for source)
+  (define text (ls-colors-text source))
+  (and
+    (string? text)
+    (> (string-length (trim text)) 0)
+    (palette.parse text)))
+
+(define (start-runtime! side width icons? guides? visibility ls-colors)
+  (set! *model*
+    (model.init
+      side
+      width
+      icons?
+      guides?
+      visibility
+      (entry-palette-for ls-colors)))
   (component.install! side render-current! handle-event!)
   (hooks.install! dispatch!)
   (subscribe-to-refresh!)
   (refresh-now!))
 
-(define (start! side width icons? guides? visibility theme-sources)
+(define (start! side width icons? guides? visibility theme-sources ls-colors)
   (when *started?*
     (error "Grove has already started"))
   (set! *started?* #t)
   (set! *theme-sources* theme-sources)
   (enqueue-thread-local-callback
-    (lambda () (start-runtime! side width icons? guides? visibility)))
+    (lambda ()
+      (start-runtime! side width icons? guides? visibility ls-colors)))
   #t)
 
 (define (enqueue-after-start! action)

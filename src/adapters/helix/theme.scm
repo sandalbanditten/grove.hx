@@ -1,6 +1,20 @@
 (require "helix/components.scm")
+(require (prefix-in palette. "../../domain/palette.scm"))
 
-(provide resolve)
+(provide resolve entry-color)
+
+; Keep this struct-to-color conversion direct. ADR 0001 covers Steel JIT
+; corruption.
+(define (entry-color color)
+  (cond
+    [(palette.rgb-color? color)
+      (Color/rgb
+        (palette.rgb-color-red color)
+        (palette.rgb-color-green color)
+        (palette.rgb-color-blue color))]
+    [(palette.indexed-color? color)
+      (Color/Indexed (palette.indexed-color-index color))]
+    [else #f]))
 
 (define (color-brightness color)
   (and

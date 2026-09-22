@@ -35,6 +35,19 @@ def grove_init() -> str:
     return ""
 
 
+@pytest.fixture
+def helix_environment() -> dict[str, str]:
+    return {}
+
+
+@given(
+    parsers.parse('the environment sets LS_COLORS to "{spec}"'),
+    target_fixture="helix_environment",
+)
+def environment_sets_ls_colors(spec: str) -> dict[str, str]:
+    return {"LS_COLORS": spec}
+
+
 @given(
     parsers.parse("Helix binds {key} to configuration reload"),
     target_fixture="grove_init",
@@ -112,6 +125,7 @@ def start_helix(
     grove_settings: dict[str, str],
     grove_init: str,
     helix_theme: str,
+    helix_environment: dict[str, str],
 ) -> GroveDriver:
     return _launch(
         resources,
@@ -122,6 +136,7 @@ def start_helix(
         settings=grove_settings,
         theme=helix_theme,
         init=grove_init,
+        environment=helix_environment,
     )
 
 
@@ -244,6 +259,7 @@ def _launch(
     settings: dict[str, str] | None = None,
     theme: str = TEST_THEME,
     init: str = "",
+    environment: dict[str, str] | None = None,
 ) -> GroveDriver:
     grove = start_grove(
         helix_sandbox,
@@ -254,6 +270,7 @@ def _launch(
         settings=settings,
         theme=theme,
         init=init,
+        environment=environment,
     )
     resources.callback(grove.close)
     return grove

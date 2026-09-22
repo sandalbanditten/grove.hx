@@ -1,6 +1,7 @@
 (require (prefix-in expansion. "../src/domain/expansion.scm"))
 (require (prefix-in layout. "../src/domain/layout.scm"))
 (require (prefix-in model. "../src/domain/model.scm"))
+(require (prefix-in palette. "../src/domain/palette.scm"))
 (require (prefix-in row. "../src/domain/row.scm"))
 (require (prefix-in tree. "../src/domain/tree.scm"))
 
@@ -187,7 +188,7 @@
         (loop (+ height 1))))))
 
 (define initial-model
-  (model.init 'left 16 #t #t 'always))
+  (model.init 'left 16 #t #t 'always #f))
 
 (define (updated model-value transition . arguments)
   (model.update-result-model
@@ -417,3 +418,84 @@
 (check
   "a scrambled scan still ranks directories before files"
   (directory-run? (mixed-scan ORDER-SIZE)))
+
+; An Entry palette resolves `LS_COLORS` codes that no rendered row can show:
+; a terminal reports the resulting color, never the run that produced it.
+(define (rgb-equal? color red green blue)
+  (and
+    (palette.rgb-color? color)
+    (= (palette.rgb-color-red color) red)
+    (= (palette.rgb-color-green color) green)
+    (= (palette.rgb-color-blue color) blue)))
+
+(define (file-appearance spec label)
+  (palette.appearance-for (palette.parse spec) label 'file))
+
+(define (file-foreground spec label)
+  (palette.appearance-foreground (file-appearance spec label)))
+
+(define with-background
+  (file-appearance "fi=0;38;2;10;20;30;48;2;40;50;60" "plain"))
+
+(check
+  "a background run never reaches the foreground or the modifiers"
+  (and
+    (rgb-equal? (palette.appearance-foreground with-background) 10 20 30)
+    (null? (palette.appearance-modifiers with-background))))
+
+(define after-reset
+  (file-appearance "fi=1;38;2;10;20;30;0;38;2;40;50;60" "plain"))
+
+(check
+  "a reset clears the foreground and modifiers gathered before it"
+  (and
+    (rgb-equal? (palette.appearance-foreground after-reset) 40 50 60)
+    (null? (palette.appearance-modifiers after-reset))))
+
+(define indexed-run (file-appearance "fi=38;5;214" "x"))
+(define indexed-foreground (palette.appearance-foreground indexed-run))
+
+(check
+  "an indexed foreground keeps its slot and consumes its whole run"
+  (and
+    (palette.indexed-color? indexed-foreground)
+    (= (palette.indexed-color-index indexed-foreground) 214)
+    (null? (palette.appearance-modifiers indexed-run))))
+
+(define plain-slot (file-foreground "fi=34" "x"))
+(define bright-slot (file-foreground "fi=94" "x"))
+
+(check
+  "the eight-color codes name the first palette slots and their bright halves"
+  (and
+    (palette.indexed-color? plain-slot)
+    (= (palette.indexed-color-index plain-slot) 4)
+    (palette.indexed-color? bright-slot)
+    (= (palette.indexed-color-index bright-slot) 12)))
+
+(check
+  "modifiers survive alongside a foreground in spec order"
+  (equal?
+    (palette.appearance-modifiers
+      (file-appearance "fi=1;3;38;2;10;20;30" "x"))
+    '(bold italic)))
+
+(define SALVAGED-SPEC "nonsense::=:*=:fi=0;38;2;10;20;30")
+
+(check
+  "an unparsable entry is skipped without losing the rest of the spec"
+  (rgb-equal? (file-foreground SALVAGED-SPEC "x") 10 20 30))
+
+(define INDEXED-TIE-SPEC "*.md=0;38;2;10;20;30:*.md=0;38;2;40;50;60")
+(define SCANNED-TIE-SPEC
+  "*README.md=0;38;2;10;20;30:*README.md=0;38;2;40;50;60")
+
+(check
+  "a later rule wins an equal-length tie"
+  (and
+    (rgb-equal? (file-foreground INDEXED-TIE-SPEC "notes.md") 40 50 60)
+    (rgb-equal? (file-foreground SCANNED-TIE-SPEC "README.md") 40 50 60)))
+
+(check
+  "a spec without a matching rule leaves the row to its Theme role"
+  (not (file-appearance "di=0;38;2;10;20;30" "plain.txt")))

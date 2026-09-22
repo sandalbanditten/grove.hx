@@ -74,7 +74,7 @@ class TuiDriver:
         argv: Sequence[str],
         *,
         cwd: Path,
-        env: Mapping[str, str] | None = None,
+        env: Mapping[str, str | None] | None = None,
         width: int = 100,
         height: int = 30,
     ) -> TuiDriver:
@@ -82,9 +82,19 @@ class TuiDriver:
             raise ValueError("TUI argv must not be empty")
         if width < 1 or height < 1:
             raise ValueError("Terminal dimensions must be positive")
+        # A None value removes the variable, which keeps a sandbox free of
+        # whatever the developer's own shell exports. env reads its options
+        # before the first assignment, so removals have to come first.
+        settings = env or {}
         command = [
             "env",
-            *(f"{key}={value}" for key, value in (env or {}).items()),
+            *(
+                part
+                for key, value in settings.items()
+                if value is None
+                for part in ("-u", key)
+            ),
+            *(f"{key}={value}" for key, value in settings.items() if value is not None),
             *argv,
         ]
         try:

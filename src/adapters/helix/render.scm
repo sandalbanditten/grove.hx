@@ -3,6 +3,8 @@
 (require (prefix-in tree. "../../domain/tree.scm"))
 (require (prefix-in path. "../../domain/path.scm"))
 (require (prefix-in layout. "../../domain/layout.scm"))
+(require (prefix-in palette. "../../domain/palette.scm"))
+(require (prefix-in theme. "theme.scm"))
 (require (prefix-in devicons. "devicons/devicons.scm"))
 
 (provide draw!)
@@ -149,11 +151,31 @@
       '()
       (list (run " " base-style)))))
 
+; Grove applies only the modifiers it can compose over a resolved row
+; background. ADR 0010 keeps that background intact, so a reversing or hiding
+; modifier is dropped rather than allowed to replace it. Steel exposes no
+; underline style to construct, so underline is dropped too.
+(define (with-modifier current-style modifier)
+  (cond
+    [(equal? modifier 'bold) (style-with-bold current-style)]
+    [(equal? modifier 'dim) (style-with-dim current-style)]
+    [(equal? modifier 'italic) (style-with-italics current-style)]
+    [else current-style]))
+
+(define (with-modifiers current-style modifiers)
+  (if
+    (null? modifiers)
+    current-style
+    (with-modifiers
+      (with-modifier current-style (car modifiers))
+      (cdr modifiers))))
+
 (define (row-runs slot width current-facts current-theme base-style)
   (define entry (layout.slot-entry slot))
   (define body-width (max 0 (- width 1)))
   (define error-icon (error-icon-for-kind (tree.entry-kind entry)))
   (define git-status (row.git-status current-facts entry))
+  (define entry-appearance (row.appearance current-facts entry))
   (define label-foreground
     (or
       (and
@@ -161,17 +183,30 @@
         (hash-ref current-theme 'filesystem-error-foreground))
       ; Colored statuses are exactly the Theme roles named after them.
       ; Ignored has no role and dims the label instead.
-      (and git-status (hash-try-get current-theme git-status))))
+      (and git-status (hash-try-get current-theme git-status))
+      (and
+        entry-appearance
+        (theme.entry-color
+          (palette.appearance-foreground entry-appearance)))))
   (define label-base
     (if
       label-foreground
       (style-fg base-style label-foreground)
       base-style))
+  ; Entry palette modifiers say what kind of entry this is, so they survive a
+  ; status that replaces the foreground.
+  (define label-styled
+    (if
+      entry-appearance
+      (with-modifiers
+        label-base
+        (palette.appearance-modifiers entry-appearance))
+      label-base))
   (define label-final
     (if
       (equal? git-status 'ignored)
-      (style-with-dim label-base)
-      label-base))
+      (style-with-dim label-styled)
+      label-styled))
   (define unsaved-status (row.unsaved-status current-facts entry))
   (define body
     (fit-runs
