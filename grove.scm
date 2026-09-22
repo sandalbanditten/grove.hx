@@ -62,6 +62,18 @@
       (valid-theme-source? (cdr (car sources)))
       (valid-theme-sources? (cdr sources)))))
 
+; `fit` starts Grove at its Natural width; an integer starts it there instead.
+(define (valid-width? value)
+  (or
+    (equal? value 'fit)
+    (and (integer? value) (>= value 16) (<= value 64))))
+
+(define (fit-width? value)
+  (equal? value 'fit))
+
+(define (start-width value)
+  (if (fit-width? value) 32 value))
+
 (define (valid-ls-colors? value)
   (or
     (not value)
@@ -77,7 +89,7 @@
          ls-colors)
   (unless (or (equal? side 'left) (equal? side 'right))
     (error "invalid Grove side"))
-  (unless (and (integer? width) (>= width 16) (<= width 64))
+  (unless (valid-width? width)
     (error "invalid Grove width"))
   (unless (boolean? icons?)
     (error "Grove icons must be a boolean"))
@@ -108,12 +120,13 @@
   (validate-settings side width icons? guides? visibility theme ls-colors)
   (helix.start!
     side
-    width
+    (start-width width)
     icons?
     guides?
     visibility
     (grove-theme-value-sources theme)
-    ls-colors))
+    ls-colors
+    (fit-width? width)))
 
 ;;@doc
 ;;Focus Grove.

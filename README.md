@@ -78,7 +78,7 @@ file picker before Steel components mount.
 | `#:ls-colors` | `#f` | `#f`, `'environment`, or an `LS_COLORS` string | Colors entry labels from an `LS_COLORS` palette, the way `eza` does. `'environment` reads `LS_COLORS` then `EZA_COLORS` at startup. See [THEMING.md](THEMING.md). |
 | `#:side` | `'left` | `'left` or `'right` | Places Grove on that side of the editor. |
 | `#:theme` | `(grove-theme)` | A `grove-theme` value | Follows the active Helix theme by default. See [THEMING.md](THEMING.md) for role and color overrides. |
-| `#:width` | `32` | `16` through `64` | Sets the total width, including the Rail that separates Grove from the editor and acts as its scrollbar. |
+| `#:width` | `32` | `16` through `64`, or `'fit` | Sets the total width, including the Rail that separates Grove from the editor and acts as its scrollbar. `'fit` starts as wide as the widest entry needs, the way `=` resizes later. |
 | `#:visibility` | `'always` | `'always` or `'focused` | Keeps the Pane visible, or shows it only while Grove is focused. |
 
 For example:

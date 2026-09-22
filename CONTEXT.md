@@ -80,10 +80,11 @@ to derive Pane bounds, Pane availability, ordinary capacity, and Rail geometry.
 _Avoid_: Pane geometry, viewport geometry
 
 **Natural width**:
-The Pane width that shows every Visible row whole: its Cursor mark, Ancestor
-traces, expansion control, icon area, label, and Unsaved mark, plus the Rail
-beside them. Fitting requests it for the widest Visible row and stays within
-the Grove width limits and the space the Host leaves.
+The Pane width that shows every Visible row whole: its Git mark, Cursor mark,
+Ancestor traces, expansion control, icon area, label, and Unsaved mark, plus
+the Rail beside them. Fitting requests it for the widest Visible row and stays
+within the Grove width limits and the space the Host leaves. Grove fits on
+request, and on its first frame when started at this width.
 _Avoid_: Preferred width, auto width, content width
 
 **Rail**:

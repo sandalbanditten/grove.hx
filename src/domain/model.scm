@@ -18,7 +18,7 @@
   focus-frame-observed
   observation-received
   first-observation-received
-  reveal-frame-observed
+  start-frame-observed
   unsaved-observed
   save-started
   geometry-observed
@@ -538,7 +538,7 @@
             (tree.expandable-kind? (tree.entry-kind entry))))]
       [else (error "invalid Cursor mutation action")])))
 
-(define (resize-to-requested model requested-width)
+(define (resized-model model requested-width)
   (define current-geometry (model-value-geometry model))
   (define host-limit
     (and
@@ -549,11 +549,14 @@
       host-limit
       (min MAX-WIDTH (max MIN-WIDTH host-limit))
       MAX-WIDTH))
-  (define next-width (clamp requested-width MIN-WIDTH upper))
+  (copy-model model #:width (clamp requested-width MIN-WIDTH upper)))
+
+(define (resize-to-requested model requested-width)
+  (define next-model (resized-model model requested-width))
   (if
-    (= next-width (model-value-width model))
+    (= (model-value-width next-model) (model-value-width model))
     (update-result model #f)
-    (update-result (copy-model model #:width next-width) #f)))
+    (update-result next-model #f)))
 
 (define (focus-frame-observed model snapshot geometry-value)
   (update-result
@@ -592,9 +595,13 @@
       (layout.reveal current-layout active-id 'first))
     model))
 
-(define (reveal-frame-observed model geometry-value)
+; The first frame is where Host geometry first exists, so a startup fit and the
+; anchor that depends on it both settle here, fit first.
+(define (start-frame-observed model geometry-value fit-width?)
+  (define installed (install-geometry model geometry-value))
   (update-result
-    (revealed-model (install-geometry model geometry-value))
+    (revealed-model
+      (if fit-width? (fitted-model installed) installed))
     #f))
 
 (define (observation-received model snapshot)
@@ -646,9 +653,13 @@
           widest
           (row.natural-width current-facts (car remaining) icons))))))
 
-(define (fit-width-requested model)
+(define (fitted-model model)
   (define target (natural-width model))
+  (if target (resized-model model target) model))
+
+(define (fit-width-requested model)
+  (define next-model (fitted-model model))
   (if
-    target
-    (resize-to-requested model target)
-    (update-result model #f)))
+    (= (model-value-width next-model) (model-value-width model))
+    (update-result model #f)
+    (update-result next-model #f)))

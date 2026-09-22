@@ -21,6 +21,7 @@ _SETTING_VALUES = {
     "wide text": json.dumps("wide"),
     "non-boolean": "'enabled",
     "environment": "'environment",
+    "fit": "'fit",
 }
 
 

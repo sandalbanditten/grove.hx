@@ -80,6 +80,24 @@ Feature: Size and place the Pane
       | 64      | 100      | +   | 64       | 100   |
       | 24      | 25       | +   | 24       | 26    |
 
+  Scenario Outline: Start at the fitted width
+    Given a Workspace containing entries
+      | path    |
+      | <entry> |
+    And "<entry>" is Active
+    And Grove settings
+      | setting | value |
+      | side    | left  |
+      | width   | fit   |
+    When Helix starts with Grove in that Workspace
+    Then Grove is Docked on the "left" at width <expected>
+    And no File tree row is clipped
+
+    Examples:
+      | entry                             | expected |
+      | a-considerably-long-file-name.txt | 41       |
+      | a.txt                             | 16       |
+
   Scenario Outline: Fit the width to the widest Visible row
     Given a Workspace containing entries
       | path    |

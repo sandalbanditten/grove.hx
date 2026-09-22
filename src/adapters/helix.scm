@@ -22,6 +22,7 @@
 (define *latest-frame* #f)
 (define *focus-next-frame?* #f)
 (define *reveal-next-frame?* #f)
+(define *fit-width?* #f)
 (define *started?* #f)
 (define *theme-sources* '())
 
@@ -127,7 +128,8 @@
         (model.focus-frame-observed *model* snapshot geometry))]
     [*reveal-next-frame?*
       (set! *reveal-next-frame?* #f)
-      (commit! (model.reveal-frame-observed *model* geometry))]
+      (commit!
+        (model.start-frame-observed *model* geometry *fit-width?*))]
     [else (commit! (model.geometry-observed *model* geometry))])
   (define model-at-render *model*)
   (define current-layout (model.presented-layout model-at-render))
@@ -189,7 +191,7 @@
     (> (string-length (trim text)) 0)
     (palette.parse text)))
 
-(define (start-runtime! side width icons? guides? visibility ls-colors)
+(define (start-runtime! side width icons? guides? visibility ls-colors fit?)
   (set! *model*
     (model.init
       side
@@ -200,18 +202,33 @@
       (entry-palette-for ls-colors)))
   (component.install! side render-current! handle-event!)
   (hooks.install! dispatch!)
+  (set! *fit-width?* fit?)
   (set! *reveal-next-frame?* #t)
   (subscribe-to-refresh!)
   (reveal-now!))
 
-(define (start! side width icons? guides? visibility theme-sources ls-colors)
+(define (start! side
+         width
+         icons?
+         guides?
+         visibility
+         theme-sources
+         ls-colors
+         fit-width?)
   (when *started?*
     (error "Grove has already started"))
   (set! *started?* #t)
   (set! *theme-sources* theme-sources)
   (enqueue-thread-local-callback
     (lambda ()
-      (start-runtime! side width icons? guides? visibility ls-colors)))
+      (start-runtime!
+        side
+        width
+        icons?
+        guides?
+        visibility
+        ls-colors
+        fit-width?)))
   #t)
 
 (define (enqueue-after-start! action)
